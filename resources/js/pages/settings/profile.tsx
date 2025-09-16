@@ -9,6 +9,7 @@ import HeadingSmall from '@/components/heading-small';
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
@@ -39,8 +40,21 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                         }}
                         className="space-y-6"
                     >
-                        {({ processing, recentlySuccessful, errors }) => (
+                        {({ processing, recentlySuccessful, errors, defaults }) => (
                             <>
+                                <div className="grid gap-2">
+                                    <Label>Profile picture</Label>
+                                    <div className="flex items-center gap-3">
+                                        <Avatar className="h-12 w-12 overflow-hidden rounded-full">
+                                            <AvatarImage src={auth.user.avatar ? (auth.user.avatar.startsWith('http') ? auth.user.avatar : `/storage/${auth.user.avatar}`) : undefined} alt={auth.user.name} />
+                                            <AvatarFallback className="rounded-full bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
+                                                {auth.user.name.split(' ').map((n: string) => n.charAt(0)).join('').slice(0, 2).toUpperCase()}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                        <Input id="avatar" name="avatar" type="file" accept="image/*" />
+                                    </div>
+                                    <InputError className="mt-2" message={errors.avatar} />
+                                </div>
                                 <div className="grid gap-2">
                                     <Label htmlFor="name">Name</Label>
 

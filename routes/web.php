@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AlignmentController;
 use App\Http\Controllers\WeekStatusController;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -17,6 +18,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('week-status', [WeekStatusController::class, 'index'])->name('week-status.index');
     Route::post('week-status', [WeekStatusController::class, 'upsert'])->name('week-status.upsert');
+    Route::get('alignment', [AlignmentController::class, 'index'])->name('alignment.index');
 });
 
 require __DIR__.'/settings.php';

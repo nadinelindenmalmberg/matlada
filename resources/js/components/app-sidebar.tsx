@@ -1,6 +1,6 @@
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
-import { CalendarCheck } from 'lucide-react';
+import { CalendarCheck, LineChart } from 'lucide-react';
 import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
@@ -16,6 +16,11 @@ const mainNavItems: NavItem[] = [
         href: '/week-status',
         icon: CalendarCheck,
     },
+    {
+        title: 'Alignment',
+        href: '/alignment',
+        icon: LineChart,
+    },
 ];
 
 const footerNavItems: NavItem[] = [
@@ -26,7 +31,7 @@ const footerNavItems: NavItem[] = [
     },
     {
         title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#react',
+        href: 'https://github.com/filipsjolanderr/matlada',
         icon: BookOpen,
     },
 ];

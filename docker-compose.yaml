@@ -1,0 +1,58 @@
+# docker-compose.yml
+
+version: '3.8'
+
+services:
+  # Laravel App Service (FrankenPHP)
+  app:
+    image: dunglas/frankenphp
+    restart: unless-stopped
+    ports:
+      - "80:80"       # HTTP
+      - "443:443"     # HTTPS
+      - "443:443/udp" # HTTP/3
+    volumes:
+      # Mount your Laravel project directory into the container
+      - ./:/app
+      # Persist Caddy's data for SSL certificates
+      - caddy_data:/data
+      - caddy_config:/config
+    environment:
+      # Use variables from the .env file
+      SERVER_NAME: ${APP_URL:-:80}
+      # Pass database credentials to the app
+      DB_CONNECTION: ${DB_CONNECTION:-pgsql}
+      DB_HOST: ${DB_HOST:-db}
+      DB_PORT: ${DB_PORT:-5432}
+      DB_DATABASE: ${DB_DATABASE:-laravel}
+      DB_USERNAME: ${DB_USERNAME:-sail}
+      DB_PASSWORD: ${DB_PASSWORD:-password}
+    depends_on:
+      db:
+        condition: service_healthy # Wait for the database to be ready
+
+  # PostgreSQL Database Service
+  db:
+    image: postgres:15
+    restart: unless-stopped
+    volumes:
+      # Persist database data
+      - db-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: ${DB_DATABASE:-laravel}
+      POSTGRES_USER: ${DB_USERNAME:-sail}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+    ports:
+      # Optionally expose the database port to the host machine
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-sail} -d ${DB_DATABASE:-laravel}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+# Named volumes for data persistence
+volumes:
+  db-data:
+  caddy_data:
+  caddy_config:
