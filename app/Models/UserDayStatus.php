@@ -16,6 +16,7 @@ class UserDayStatus extends Model
 		'weekday',
 		'status',
 		'arrival_time',
+		'location',
 	];
 
 	protected $casts = [
@@ -28,5 +29,3 @@ class UserDayStatus extends Model
 		return $this->belongsTo(User::class);
 	}
 }
-
-

@@ -44,6 +44,7 @@ class WeekStatusController extends Controller
 			'weekday' => ['required', 'integer', 'between:1,5'],
 			'status' => ['nullable', 'in:Matlåda,Köpa'],
 			'arrival_time' => ['nullable', 'date_format:H:i'],
+			'location' => ['nullable', 'string', 'max:120'],
 		]);
 
 		$userId = (int) $request->user()->id;
@@ -57,11 +58,10 @@ class WeekStatusController extends Controller
 			[
 				'status' => $request->input('status'),
 				'arrival_time' => $request->input('arrival_time'),
+				'location' => $request->input('location'),
 			]
 		);
 
 		return back();
 	}
 }
-
-

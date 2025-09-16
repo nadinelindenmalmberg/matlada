@@ -6,15 +6,11 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, Sid
 import { dashboard } from '@/routes';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid } from 'lucide-react';
+import { BookOpen, Github } from 'lucide-react';
 import AppLogo from './app-logo';
+import { useI18n } from '@/lib/i18n';
 
 const mainNavItems: NavItem[] = [
-    {
-        title: 'Dashboard',
-        href: dashboard(),
-        icon: LayoutGrid,
-    },
     {
         title: 'Vecka',
         href: '/week-status',
@@ -25,8 +21,8 @@ const mainNavItems: NavItem[] = [
 const footerNavItems: NavItem[] = [
     {
         title: 'Repository',
-        href: 'https://github.com/laravel/react-starter-kit',
-        icon: Folder,
+        href: 'https://github.com/filipsjolanderr/matlada',
+        icon: Github,
     },
     {
         title: 'Documentation',
@@ -36,6 +32,7 @@ const footerNavItems: NavItem[] = [
 ];
 
 export function AppSidebar() {
+    const { t } = useI18n();
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
@@ -55,7 +52,10 @@ export function AppSidebar() {
             </SidebarContent>
 
             <SidebarFooter>
-                <NavFooter items={footerNavItems} className="mt-auto" />
+                <NavFooter items={[
+                    { ...footerNavItems[0], title: t('Repository') },
+                    { ...footerNavItems[1], title: t('Documentation') },
+                ]} className="mt-auto" />
                 <NavUser />
             </SidebarFooter>
         </Sidebar>

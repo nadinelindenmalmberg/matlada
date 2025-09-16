@@ -46,6 +46,11 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user(),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            'locale' => app()->getLocale(),
+            'messages' => fn () => [
+                'en' => json_decode((string) file_get_contents(resource_path('lang/en.json')), true) ?? [],
+                'sv' => json_decode((string) file_get_contents(resource_path('lang/sv.json')), true) ?? [],
+            ],
         ];
     }
 }
