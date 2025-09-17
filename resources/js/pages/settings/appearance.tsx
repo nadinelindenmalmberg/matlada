@@ -8,22 +8,25 @@ import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
 import { edit as editAppearance } from '@/routes/appearance';
 import { LocaleSwitcher } from '@/components/locale-switcher';
-
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Appearance settings',
-        href: editAppearance().url,
-    },
-];
+import { useI18n } from '@/lib/i18n';
 
 export default function Appearance() {
+    const { t } = useI18n();
+
+    const breadcrumbs: BreadcrumbItem[] = [
+        {
+            title: t('Appearance settings'),
+            href: editAppearance().url,
+        },
+    ];
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Appearance settings" />
+            <Head title={t('Appearance settings')} />
 
             <SettingsLayout>
                 <div className="space-y-6">
-                    <HeadingSmall title="Appearance settings" description="Update your account's appearance settings" />
+                    <HeadingSmall title={t('Appearance settings')} description={t('Update your account\'s appearance settings')} />
                     <AppearanceTabs />
                     <LocaleSwitcher />
                 </div>

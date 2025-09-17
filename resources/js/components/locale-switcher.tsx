@@ -29,8 +29,8 @@ export function LocaleSwitcher({ label, iconOnly = false }: LocaleSwitcherProps)
                 <SelectTrigger
                     className={
                         iconOnly
-                            ? 'h-9 w-9 justify-center rounded-md px-0 border-0 bg-transparent hover:bg-accent hover:text-accent-foreground shadow-none focus:outline-none focus-visible:ring-0 focus-visible:border-transparent'
-                            : 'h-8'
+                            ? 'h-9 w-9 justify-center rounded-md px-0 border-0 bg-transparent text-[#1b1b18] hover:bg-[#19140035] hover:text-[#1b1b18] dark:text-[#EDEDEC] dark:hover:bg-[#3E3E3A] dark:hover:text-[#EDEDEC] shadow-none focus:outline-none focus-visible:ring-0 focus-visible:border-transparent'
+                            : 'h-8 text-[#1b1b18] dark:text-[#EDEDEC]'
                     }
                     hideIndicator={iconOnly}
                     aria-label="Change language"

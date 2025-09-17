@@ -216,12 +216,12 @@ export default function WeekStatusIndex() {
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead>{t('User', 'User')}</TableHead>
+                                    <TableHead className="w-[150px] min-w-[150px]">{t('User', 'User')}</TableHead>
                                     {weekdays.map((d) => {
                                         const date = getDateFromIsoWeek(week, d.value);
                                         const isToday = isSameLocalDate(date, new Date());
                                         return (
-                                            <TableHead key={d.value} className={`border-l align-middle w-full sm:w-[260px] ${d.value !== activeDayMobile ? 'hidden sm:table-cell' : ''}`}>
+                                            <TableHead key={d.value} className={`border-l align-middle w-[150px] min-w-[150px] ${d.value !== activeDayMobile ? 'hidden sm:table-cell' : ''}`}>
                                                 <div className="flex flex-col gap-0.5 mt-2 mb-2 text-center text-foreground">
                                                     <span>
                                                         {isToday ? (
@@ -242,7 +242,7 @@ export default function WeekStatusIndex() {
                             <TableBody>
                                 {users.map((u) => (
                                     <TableRow key={u.id}>
-                                        <TableCell className="whitespace-nowrap align-middle p-2">
+                                        <TableCell className="whitespace-nowrap align-middle p-2 w-[150px] min-w-[150px]">
                                             <div className="flex items-center gap-2">
                                                 <Avatar className="h-8 w-8 overflow-hidden rounded-full">
                                                     <AvatarImage src={(u as UserWithAvatar).avatar ? (((u as UserWithAvatar).avatar as string).startsWith('http') ? (u as UserWithAvatar).avatar : `/storage/${(u as UserWithAvatar).avatar}`) : undefined} alt={u.name} />
@@ -262,7 +262,7 @@ export default function WeekStatusIndex() {
                                             const cellKey = getCellKey(u.id, d.value);
                                             const locationValue = (draftLocations[cellKey] ?? (current?.location ?? ''));
                                             return (
-                                                <TableCell key={d.value} className={`border-l align-middle p-2 w-full sm:w-[380px] ${d.value !== activeDayMobile ? 'hidden sm:table-cell' : ''}`}>
+                                                <TableCell key={d.value} className={`border-l align-middle p-2 w-[150px] min-w-[150px] ${d.value !== activeDayMobile ? 'hidden sm:table-cell' : ''}`}>
                                                     <div className="flex flex-col gap-1.5 w-full">
                                                         <div className="flex items-center gap-2">
                                                             <span className={`text-[11px] text-muted-foreground inline-block ${isSelf ? 'sm:w-11 w-12' : 'sm:w-9 w-10'}`}>{t('Lunch', 'Lunch')}:</span>
@@ -300,7 +300,8 @@ export default function WeekStatusIndex() {
                                                                         value === 'Lunchbox' ? t('Lunchbox', 'Lunchbox') : value === 'Buying' ? t('Buying', 'Buying') : t('Home', 'Home')
                                                                     }</Badge>
                                                                 ) : (
-                                                                    <span className="text-xs text-muted-foreground">—</span>
+                
+                                                                        <span className="text-xs text-muted-foreground ml-2">—</span>
                                                                 )
                                                             )}
                                                         </div>
@@ -322,16 +323,20 @@ export default function WeekStatusIndex() {
                                                                     <span className={timeValue ? "text-xs" : "text-xs text-muted-foreground"}>{timeValue || '—'}</span>
                                                                 )
                                                             ) : (
-                                                                <Input
-                                                                    type="time"
-                                                                    step="60"
-                                                                    aria-label={t('Arrival time not needed', 'Arrival time not needed')}
-                                                                    title={t('Arrival time not needed', 'Arrival time not needed')}
-                                                                    className="h-8 w-full sm:w-auto bg-muted text-muted-foreground"
-                                                                    value={''}
-                                                                    disabled
-                                                                    readOnly
-                                                                />
+                                                                isSelf ? (
+                                                                    <Input
+                                                                        type="time"
+                                                                        step="60"
+                                                                        aria-label={t('Arrival time not needed', 'Arrival time not needed')}
+                                                                        title={t('Arrival time not needed', 'Arrival time not needed')}
+                                                                        className="h-8 w-full sm:w-auto bg-muted text-muted-foreground"
+                                                                        value={''}
+                                                                        disabled
+                                                                        readOnly
+                                                                    />
+                                                                ) : (
+                                                                    <span className="text-xs text-muted-foreground">—</span>
+                                                                )
                                                             )}
                                                         </div>
                                                         <div className="flex items-center gap-2">
@@ -398,16 +403,20 @@ export default function WeekStatusIndex() {
                                                                     <span className={locationValue ? "text-xs" : "text-xs text-muted-foreground"}>{locationValue || '—'}</span>
                                                                 )
                                                             ) : (
-                                                                <div className="relative flex-1 min-w-0 sm:min-w-[100px]">
-                                                                    <input
-                                                                        type="text"
-                                                                        className="h-8 w-full rounded-md border bg-muted px-2 text-sm text-muted-foreground"
-                                                                        placeholder={t('Not needed', 'Not needed')}
-                                                                        value=""
-                                                                        disabled
-                                                                        readOnly
-                                                                    />
-                                                                </div>
+                                                                isSelf ? (
+                                                                    <div className="relative flex-1 min-w-0 sm:min-w-[100px]">
+                                                                        <input
+                                                                            type="text"
+                                                                            className="h-8 w-full rounded-md border bg-muted px-2 text-sm text-muted-foreground"
+                                                                            placeholder={t('Not needed', 'Not needed')}
+                                                                            value=""
+                                                                            disabled
+                                                                            readOnly
+                                                                        />
+                                                                    </div>
+                                                                ) : (
+                                                                    <span className="text-xs text-muted-foreground">—</span>
+                                                                )
                                                             )}
                                                         </div>
                                                     </div>

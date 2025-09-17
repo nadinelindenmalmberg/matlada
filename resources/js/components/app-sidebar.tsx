@@ -1,12 +1,12 @@
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
-import { CalendarCheck, LineChart } from 'lucide-react';
+import { CalendarCheck, LineChart, Vote } from 'lucide-react';
 import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Github } from 'lucide-react';
+import { Github } from 'lucide-react';
 import AppLogo from './app-logo';
 import { useI18n } from '@/lib/i18n';
 
@@ -20,7 +20,7 @@ const mainNavItems: NavItem[] = [
         title: 'Alignment',
         href: '/alignment',
         icon: LineChart,
-    },
+    }
 ];
 
 const footerNavItems: NavItem[] = [
@@ -28,11 +28,6 @@ const footerNavItems: NavItem[] = [
         title: 'Repository',
         href: 'https://github.com/filipsjolanderr/matlada',
         icon: Github,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://github.com/filipsjolanderr/matlada',
-        icon: BookOpen,
     },
 ];
 
@@ -59,7 +54,6 @@ export function AppSidebar() {
             <SidebarFooter>
                 <NavFooter items={[
                     { ...footerNavItems[0], title: t('Repository') },
-                    { ...footerNavItems[1], title: t('Documentation') },
                 ]} className="mt-auto" />
                 <NavUser />
             </SidebarFooter>

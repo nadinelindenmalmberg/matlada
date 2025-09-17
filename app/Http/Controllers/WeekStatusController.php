@@ -26,8 +26,11 @@ class WeekStatusController extends Controller
             $week = $weekParam;
         }
 
+        $currentUserId = $request->user()->id;
+
         $users = User::query()
             ->select(['id', 'name', 'email', 'avatar'])
+            ->orderByRaw('CASE WHEN id = ? THEN 0 ELSE 1 END', [$currentUserId])
             ->orderBy('name')
             ->get();
 

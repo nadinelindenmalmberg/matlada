@@ -20,6 +20,7 @@ export default function Welcome() {
                 <header className="mb-6 w-full max-w-[335px] text-sm not-has-[nav]:hidden lg:max-w-4xl">
                     <nav className="flex items-center justify-between gap-4">
                         <div className="flex items-center gap-2">
+                            <AppearanceToggleDropdown />
                             <LocaleSwitcher iconOnly />
                         </div>
                         <div className="flex items-center gap-2">
@@ -45,9 +46,7 @@ export default function Welcome() {
                                         {t('Register', 'Register')}
                                     </Link>
                                 </>
-                            )}
-                            <AppearanceToggleDropdown />
-                        </div>
+                            )}                        </div>
                     </nav>
                 </header>
                 <div className="flex w-full items-center justify-center opacity-100 transition-opacity duration-750 lg:grow starting:opacity-0">
@@ -83,8 +82,8 @@ export default function Welcome() {
                                 <h2 className="mb-1 text-sm font-medium">{t('How the Week Status page works', 'How the Week Status page works')}</h2>
                                 <p className="text-[13px] text-[#706f6c] dark:text-[#A1A09A]">
                                     {t(
-                                        'Each row is a user. Columns are weekdays. You can update your own lunch choice, arrival time, and location. Changes save automatically and others can see the weekly overview.',
-                                        'Each row is a user. Columns are weekdays. You can update your own lunch choice, arrival time, and location. Changes save automatically and others can see the weekly overview.',
+                                        'You can update your own lunch choice, arrival time, and location. Changes save automatically and others can see the weekly overview.',
+                                        'You can update your own lunch choice, arrival time, and location. Changes save automatically and others can see the weekly overview.',
                                     )}
                                 </p>
                             </div>
