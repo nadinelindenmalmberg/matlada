@@ -15,9 +15,12 @@ FROM dunglas/frankenphp
 
 WORKDIR /app
 
-# ✅ ADDED: Install the PostgreSQL PHP driver
-# This ensures your app can connect to the DB when it's running
-RUN docker-php-ext-install pdo pdo_pgsql
+# ✅ FINAL FIX: Install build dependencies, then the PHP extension, then clean up.
+RUN apt-get update \
+    && apt-get install -y libpq-dev \
+    && docker-php-ext-install pdo pdo_pgsql \
+    && apt-get purge -y --auto-remove libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 # Copy the installed dependencies from the "vendor" stage
 COPY --from=vendor /app/vendor/ /app/vendor/
@@ -26,10 +29,9 @@ COPY --from=vendor /app/vendor/ /app/vendor/
 COPY . .
 
 # Set up production PHP config
-RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+RUN mv "$PHP_DIR/php.ini-production" "$PHP_DIR/php.ini"
 
-# ✅ CHANGED: Run build-safe optimization commands
-# These cache config and routes to files without needing a database
+# Run build-safe optimization commands
 RUN php artisan octane:install --server=frankenphp && \
     php artisan config:cache && \
     php artisan route:cache && \
