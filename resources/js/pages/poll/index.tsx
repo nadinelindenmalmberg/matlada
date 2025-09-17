@@ -221,6 +221,3 @@ export default function PollIndex({ poll, userVote, isVotingOpen, timeUntilDeadl
         </AppLayout>
     )
 }
-function route(arg0: string) {
-    throw new Error('Function not implemented.')
-}
