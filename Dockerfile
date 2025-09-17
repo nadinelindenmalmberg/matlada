@@ -1,7 +1,14 @@
 # Stage 1: Unified Builder
-# The official composer image includes PHP, Node.js, and npm.
+# The official composer image includes PHP. We will add Node.js.
 FROM composer:2 as builder
 WORKDIR /app
+
+# ✅ FIX: Install Node.js and npm into the builder container
+RUN apt-get update && apt-get install -y ca-certificates curl gnupg \
+    && curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg \
+    && NODE_MAJOR=20 \
+    && echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | tee /etc/apt/sources.list.d/nodesource.list \
+    && apt-get update && apt-get install nodejs -y
 
 # Copy all source files
 COPY . .
@@ -10,8 +17,9 @@ COPY . .
 RUN composer install --no-dev --optimize-autoloader
 RUN npm install
 
-# Build frontend assets (this will now work as PHP is available)
+# Build frontend assets (this will now work)
 RUN npm run build
+
 
 # Stage 2: The final, lean production image
 FROM dunglas/frankenphp
@@ -29,7 +37,6 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy the entire built application from the builder stage
-# This includes source code, vendor dir, and the public/build dir
 COPY --from=builder /app .
 
 # Set up production PHP config
