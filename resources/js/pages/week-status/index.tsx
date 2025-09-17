@@ -185,7 +185,7 @@ export default function WeekStatusIndex() {
     return (
         <AppLayout breadcrumbs={breadcrumbs} >
 
-            <Head title={`${t('Week', 'Week')} (${week})`} />
+            <Head title={`${t('Week', 'Week')} ${displayWeek}`} />
             <div className="p-3">
                 <Badge className="text-sm font-medium flex items-center gap-2 mb-3">
                     <span>{t('Week', 'Week')} {displayWeek}</span>
@@ -300,7 +300,7 @@ export default function WeekStatusIndex() {
                                                                         value === 'Lunchbox' ? t('Lunchbox', 'Lunchbox') : value === 'Buying' ? t('Buying', 'Buying') : t('Home', 'Home')
                                                                     }</Badge>
                                                                 ) : (
-                
+
                                                                         <span className="text-xs text-muted-foreground ml-2">—</span>
                                                                 )
                                                             )}
