@@ -265,7 +265,7 @@ export default function WeekStatusIndex() {
                                                 <TableCell key={d.value} className={`border-l align-middle p-2 w-[150px] min-w-[150px] ${d.value !== activeDayMobile ? 'hidden sm:table-cell' : ''}`}>
                                                     <div className="flex flex-col gap-1.5 w-full">
                                                         <div className="flex items-center gap-2">
-                                                            <span className={`text-[11px] text-muted-foreground inline-block ${isSelf ? 'sm:w-11 w-12' : 'sm:w-9 w-10'}`}>{t('Lunch', 'Lunch')}:</span>
+                                                            <span className={`text-[11px] text-muted-foreground inline-block text-right ${isSelf ? 'sm:w-11 w-12' : 'sm:w-11 w-12'}`}>{t('Lunch', 'Lunch')}:</span>
                                                             {isSelf ? (
                                                                 <Select onValueChange={(v) => {
                                                                     const newStatus = (v || null) as StatusValue;
@@ -301,12 +301,12 @@ export default function WeekStatusIndex() {
                                                                     }</Badge>
                                                                 ) : (
 
-                                                                        <span className="text-xs text-muted-foreground ml-2">—</span>
+                                                                    <span className="text-xs text-muted-foreground">—</span>
                                                                 )
                                                             )}
                                                         </div>
                                                         <div className="flex items-center gap-2">
-                                                            <span className={`text-[11px] text-muted-foreground inline-block ${isSelf ? 'sm:w-11 w-12' : 'sm:w-11 w-12'}`}>{t('Arrival', 'Arrival')}:</span>
+                                                            <span className={`text-[11px] text-muted-foreground inline-block text-right ${isSelf ? 'sm:w-11 w-12' : 'sm:w-11 w-12'}`}>{t('Arrival', 'Arrival')}:</span>
                                                             {value !== 'Home' ? (
                                                                 isSelf ? (
                                                                     <Input
@@ -340,7 +340,7 @@ export default function WeekStatusIndex() {
                                                             )}
                                                         </div>
                                                         <div className="flex items-center gap-2">
-                                                            <span className={`text-[11px] text-muted-foreground inline-block ${isSelf ? 'sm:w-11 w-12' : 'sm:w-11 w-12'}`}>{t('Location', 'Location')}:</span>
+                                                            <span className={`text-[11px] text-muted-foreground inline-block text-right ${isSelf ? 'sm:w-11 w-12' : 'sm:w-11 w-12'}`}>{t('Location', 'Location')}:</span>
                                                             {value !== 'Home' ? (
                                                                 isSelf ? (
                                                                     <div className="relative flex-1 min-w-0 sm:min-w-[100px]">
