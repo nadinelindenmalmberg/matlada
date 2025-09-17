@@ -15,14 +15,10 @@ FROM dunglas/frankenphp
 
 WORKDIR /app
 
-# ✅ FINAL FIX: Install runtime libs, build deps, extensions, then clean up.
+# ✅ SYNTAX FIX: Combined the apt-get install arguments onto one line.
 RUN apt-get update \
-    && apt-get install -y \
-        libpq-dev \ # Temporary build dependency for pgsql
-        libpq5 \    # Permanent runtime dependency for pgsql
-    && docker-php-ext-install \
-        pdo pdo_pgsql \ # The pgsql extension
-        pcntl \         # The required extension for Octane
+    && apt-get install -y libpq-dev libpq5 \
+    && docker-php-ext-install pdo pdo_pgsql pcntl \
     && apt-get purge -y --auto-remove libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
