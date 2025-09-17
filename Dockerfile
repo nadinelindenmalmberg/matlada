@@ -15,7 +15,7 @@ FROM dunglas/frankenphp
 
 WORKDIR /app
 
-# ✅ FINAL FIX: Install build dependencies, then the PHP extension, then clean up.
+# Install build dependencies, then the PHP extension, then clean up.
 RUN apt-get update \
     && apt-get install -y libpq-dev \
     && docker-php-ext-install pdo pdo_pgsql \
@@ -29,7 +29,8 @@ COPY --from=vendor /app/vendor/ /app/vendor/
 COPY . .
 
 # Set up production PHP config
-RUN mv "$PHP_DIR/php.ini-production" "$PHP_DIR/php.ini"
+# ✅ FIX: Corrected the environment variable to $PHP_INI_DIR
+RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
 # Run build-safe optimization commands
 RUN php artisan octane:install --server=frankenphp && \
