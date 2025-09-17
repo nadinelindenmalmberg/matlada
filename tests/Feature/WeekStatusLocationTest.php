@@ -13,7 +13,7 @@ it('saves and returns location with week status', function () {
 
     $week = Carbon::now()->isoFormat('GGGG-[W]WW');
 
-    $response = $this->post('/week-status', [
+    $response = $this->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class)->post('/week-status', [
         'iso_week' => $week,
         'weekday' => 3,
         'status' => 'Lunchbox',
@@ -43,7 +43,7 @@ it('accepts Home status', function () {
 
     $week = Carbon::now()->isoFormat('GGGG-[W]WW');
 
-    $response = $this->post('/week-status', [
+    $response = $this->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\ValidateCsrfToken::class)->post('/week-status', [
         'iso_week' => $week,
         'weekday' => 2,
         'status' => 'Home',

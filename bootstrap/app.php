@@ -23,11 +23,6 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
         ]);
-
-        // Disable CSRF middleware during tests
-        if (app()->environment('testing') || env('APP_ENV') === 'testing') {
-            $middleware->validateCsrfTokens(except: ['*']);
-        }
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
