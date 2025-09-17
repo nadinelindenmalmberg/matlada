@@ -3,20 +3,17 @@
 version: '3.8'
 
 services:
-  # Laravel App Service (FrankenPHP)
   app:
-    image: dunglas/frankenphp
-    restart: unless-stopped
-    ports:
-      - "80:80"       # HTTP
-      - "443:443"     # HTTPS
-      - "443:443/udp" # HTTP/3
-    volumes:
-      # Mount your Laravel project directory into the container
-      - ./:/app
-      # Persist Caddy's data for SSL certificates
-      - caddy_data:/data
-      - caddy_config:/config
+    # Build the image from the Dockerfile in the current directory
+    build: .
+    restart: always
+    command: >
+      php artisan octane:frankenphp
+      --host=0.0.0.0
+      --port=8000
+      --workers=auto
+      --max-requests=500
+
     environment:
       # Use variables from the .env file
       SERVER_NAME: ${APP_URL:-:80}
@@ -54,5 +51,3 @@ services:
 # Named volumes for data persistence
 volumes:
   db-data:
-  caddy_data:
-  caddy_config:
