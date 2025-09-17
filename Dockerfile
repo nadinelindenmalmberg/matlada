@@ -1,11 +1,11 @@
 # Stage 1: Build PHP Dependencies
 FROM composer:2 as vendor
 WORKDIR /app
-COPY database/ database/
-COPY composer.json composer.lock ./
+# ✅ FIX: Copy the entire application first to ensure 'artisan' is available.
+COPY . .
 RUN composer install --no-dev --optimize-autoloader
 
-# Stage 2: Build Frontend Assets (NEW)
+# Stage 2: Build Frontend Assets
 FROM node:20 as frontend
 WORKDIR /app
 COPY package.json package-lock.json ./
