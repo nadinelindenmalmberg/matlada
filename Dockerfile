@@ -15,10 +15,14 @@ FROM dunglas/frankenphp
 
 WORKDIR /app
 
-# Install build dependencies, then the PHP extension, then clean up.
+# ✅ FINAL FIX: Install runtime libs, build deps, extensions, then clean up.
 RUN apt-get update \
-    && apt-get install -y libpq-dev \
-    && docker-php-ext-install pdo pdo_pgsql \
+    && apt-get install -y \
+        libpq-dev \ # Temporary build dependency for pgsql
+        libpq5 \    # Permanent runtime dependency for pgsql
+    && docker-php-ext-install \
+        pdo pdo_pgsql \ # The pgsql extension
+        pcntl \         # The required extension for Octane
     && apt-get purge -y --auto-remove libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
@@ -29,7 +33,6 @@ COPY --from=vendor /app/vendor/ /app/vendor/
 COPY . .
 
 # Set up production PHP config
-# ✅ FIX: Corrected the environment variable to $PHP_INI_DIR
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
 # Run build-safe optimization commands
