@@ -6,8 +6,7 @@ WORKDIR /app
 # Copy all application files
 COPY . .
 
-# This single command handles installation and autoloader optimization.
-# We no longer need --no-scripts because the artisan file is present.
+# Install dependencies and create the optimized autoloader
 RUN composer install --no-dev --optimize-autoloader
 
 
@@ -16,19 +15,22 @@ FROM dunglas/frankenphp
 
 WORKDIR /app
 
+# ✅ ADDED: Install the PostgreSQL PHP driver
+# This ensures your app can connect to the DB when it's running
+RUN docker-php-ext-install pdo pdo_pgsql
+
 # Copy the installed dependencies from the "vendor" stage
 COPY --from=vendor /app/vendor/ /app/vendor/
 
 # Copy your application code
-# Note: This overwrites the code from the vendor stage, which is fine.
-# We only needed it there for the composer install process.
 COPY . .
 
 # Set up production PHP config
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
-# This command now ONLY runs php artisan commands, as Composer isn't here.
-# These commands prepare your application for production.
+# ✅ CHANGED: Run build-safe optimization commands
+# These cache config and routes to files without needing a database
 RUN php artisan octane:install --server=frankenphp && \
-    php artisan optimize:clear && \
-    php artisan optimize
+    php artisan config:cache && \
+    php artisan route:cache && \
+    php artisan view:cache
