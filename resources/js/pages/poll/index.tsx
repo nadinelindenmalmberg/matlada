@@ -6,7 +6,6 @@ import { Clock, Users, CheckCircle, XCircle } from 'lucide-react'
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types'
 import { useI18n } from '@/lib/i18n'
-import { route } from '@/routes'
 
 interface PollOption {
     id: number
