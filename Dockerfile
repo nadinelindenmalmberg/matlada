@@ -1,19 +1,19 @@
-# Stage 1: Build PHP Dependencies
-FROM composer:2 as vendor
+# Stage 1: Unified Builder
+# The official composer image includes PHP, Node.js, and npm.
+FROM composer:2 as builder
 WORKDIR /app
-# ✅ FIX: Copy the entire application first to ensure 'artisan' is available.
-COPY . .
-RUN composer install --no-dev --optimize-autoloader
 
-# Stage 2: Build Frontend Assets
-FROM node:20 as frontend
-WORKDIR /app
-COPY package.json package-lock.json ./
-RUN npm install
+# Copy all source files
 COPY . .
+
+# Install all dependencies (PHP & Node)
+RUN composer install --no-dev --optimize-autoloader
+RUN npm install
+
+# Build frontend assets (this will now work as PHP is available)
 RUN npm run build
 
-# Stage 3: The final, lean production image
+# Stage 2: The final, lean production image
 FROM dunglas/frankenphp
 WORKDIR /app
 
@@ -28,12 +28,9 @@ RUN apt-get update \
     && apt-get purge -y --auto-remove libpq-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy your application code first
-COPY . .
-
-# Copy built assets and dependencies from previous stages
-COPY --from=vendor /app/vendor/ /app/vendor/
-COPY --from=frontend /app/public/build /app/public/build
+# Copy the entire built application from the builder stage
+# This includes source code, vendor dir, and the public/build dir
+COPY --from=builder /app .
 
 # Set up production PHP config
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
