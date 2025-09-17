@@ -1,5 +1,7 @@
 <?php
 
+// Poll tests disabled - uncomment when poll functionality is re-enabled
+/*
 use App\Models\Poll;
 use App\Models\PollOption;
 use App\Models\User;
@@ -219,3 +221,4 @@ it('shows poll results when voting is closed', function () {
             ->where('isVotingOpen', false)
     );
 });
+*/

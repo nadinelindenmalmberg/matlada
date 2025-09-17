@@ -42,7 +42,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                         }}
                         className="space-y-6"
                     >
-                        {({ processing, recentlySuccessful, errors, defaults }) => (
+                        {({ processing, recentlySuccessful, errors }) => (
                             <>
                                 <div className="grid gap-2">
                                     <Label>{t('Profile picture')}</Label>

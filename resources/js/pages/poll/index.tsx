@@ -36,7 +36,7 @@ interface Props {
 }
 
 export default function PollIndex({ poll, userVote, isVotingOpen, timeUntilDeadline }: Props) {
-    const { post, processing, errors } = useForm()
+    const { post, processing } = useForm()
 
     const handleVote = (optionId: number) => {
         post(route('poll.vote').url, {
@@ -220,4 +220,7 @@ export default function PollIndex({ poll, userVote, isVotingOpen, timeUntilDeadl
             </div>
         </AppLayout>
     )
+}
+function route(arg0: string) {
+    throw new Error('Function not implemented.')
 }
