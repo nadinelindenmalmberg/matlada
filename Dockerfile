@@ -3,12 +3,12 @@ FROM composer:2 as vendor
 
 WORKDIR /app
 
-# Copy only dependency files first to leverage Docker cache
-COPY database/ database/
-COPY composer.json composer.lock ./
+# ✅ CHANGE: Copy ALL application files first.
+# This ensures 'artisan' is available for composer scripts.
+COPY . .
 
-# Install dependencies
-RUN composer install --no-dev --optimize-autoloader
+# Now, install dependencies.
+RUN composer install --no-scripts --no-dev --optimize-autoloader
 
 
 # Stage 2: The final production image
@@ -25,5 +25,8 @@ COPY . .
 # Set up production PHP config
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 
-# Install Octane (if not already in composer.json) and generate optimized files
-RUN php artisan octane:install --server=frankenphp
+# Finish composer setup and run optimizations
+RUN composer dump-autoload --optimize && \
+    php artisan octane:install --server=frankenphp && \
+    php artisan optimize:clear && \
+    php artisan optimize
