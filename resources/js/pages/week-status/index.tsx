@@ -440,17 +440,17 @@ export default function WeekStatusIndex() {
                                                                                 </SelectTrigger>
                                                                                 <SelectContent>
                                                                                     <SelectItem value="Lunchbox" className="group w-full">
-                                                                                        <Badge variant={getStatusBadgeVariant('Lunchbox')} className={`w-full justify-center ${getStatusBadgeClass('Lunchbox')} ${getBadgeSizeClass('Lunchbox')} tracking-tight`}>
+                                                                                        <Badge variant={getStatusBadgeVariant('Lunchbox')} className={`w-full justify-center ${getStatusBadgeClass('Lunchbox')} ${getBadgeSizeClass()} tracking-tight`}>
                                                                                             {t('Lunchbox', 'Lunchbox')}
                                                                                         </Badge>
                                                                                     </SelectItem>
                                                                                     <SelectItem value="Buying" className="group w-full">
-                                                                                        <Badge variant={getStatusBadgeVariant('Buying')} className={`w-full justify-center ${getStatusBadgeClass('Buying')} ${getBadgeSizeClass('Buying')} tracking-tight`}>
+                                                                                        <Badge variant={getStatusBadgeVariant('Buying')} className={`w-full justify-center ${getStatusBadgeClass('Buying')} ${getBadgeSizeClass()} tracking-tight`}>
                                                                                             {t('Buying', 'Buying')}
                                                                                         </Badge>
                                                                                     </SelectItem>
                                                                                     <SelectItem value="Home" className="group w-full">
-                                                                                        <Badge variant={getStatusBadgeVariant('Home')} className={`w-full justify-center ${getStatusBadgeClass('Home')} ${getBadgeSizeClass('Home')} tracking-tight`}>
+                                                                                        <Badge variant={getStatusBadgeVariant('Home')} className={`w-full justify-center ${getStatusBadgeClass('Home')} ${getBadgeSizeClass()} tracking-tight`}>
                                                                                             {t('Home', 'Home')}
                                                                                         </Badge>
                                                                                     </SelectItem>
