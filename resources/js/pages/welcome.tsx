@@ -67,13 +67,13 @@ export default function Welcome() {
                                             href={login()}
                                             className="inline-flex items-center justify-center rounded-md border border-black bg-[#1b1b18] px-5 py-2.5 text-sm font-medium text-white hover:border-black hover:bg-black dark:border-[#eeeeec] dark:bg-[#eeeeec] dark:text-[#1C1C1A] dark:hover:border-white dark:hover:bg-white"
                                         >
-                                            Log in
+                                            {t('Log in', 'Log in')}
                                         </Link>
                                         <Link
                                             href={register()}
                                             className="inline-flex items-center justify-center rounded-md border border-[#19140035] px-5 py-2.5 text-sm font-medium text-[#1b1b18] hover:border-[#1915014a] dark:border-[#3E3E3A] dark:text-[#EDEDEC] dark:hover:border-[#62605b]"
                                         >
-                                            Register
+                                            {t('Register', 'Register')}
                                         </Link>
                                     </div>
                                 </div>
@@ -91,6 +91,9 @@ export default function Welcome() {
                     </main>
                 </div>
                 <div className="hidden h-14.5 lg:block"></div>
+                <footer className="mt-6 text-xs text-[#706f6c] dark:text-[#A1A09A]">
+                    {t('Made by Filip Sjölander', 'Made by Filip Sjölander')}
+                </footer>
             </div>
         </>
     );

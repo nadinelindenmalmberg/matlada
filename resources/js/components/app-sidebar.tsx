@@ -1,6 +1,6 @@
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
-import { CalendarCheck, LineChart } from 'lucide-react';
+import { CalendarCheck, Heart, LineChart } from 'lucide-react';
 import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
@@ -29,6 +29,11 @@ const footerNavItems: NavItem[] = [
         href: 'https://github.com/filipsjolanderr/matlada',
         icon: Github,
     },
+    {
+        title: 'Made by Filip Sjölander',
+        href: 'https://github.com/filipsjolanderr',
+        icon: Heart,
+    },
 ];
 
 export function AppSidebar() {
@@ -54,6 +59,7 @@ export function AppSidebar() {
             <SidebarFooter>
                 <NavFooter items={[
                     { ...footerNavItems[0], title: t('Repository') },
+                    { ...footerNavItems[1], title: t('Made by Filip Sjölander') },
                 ]} className="mt-auto" />
                 <NavUser />
             </SidebarFooter>

@@ -34,7 +34,7 @@
     "Next day": "Nästa dag",
     "Arrival time to school": "Ankomsttid",
     "Arrival time not needed": "Tid behövs ej",
-    "Where you will be at that time": "Var du kommer vara",
+    "Where you will be at that time": "Var",
     "Location where you will be at that time": "Plats där du kommer vara då",
     "No matches": "Inga träffar",
     "Not needed": "Behövs ej",
@@ -93,5 +93,6 @@
     "Click here to resend the verification email.": "Klicka här för att skicka verifieringsmail igen.",
     "A new verification link has been sent to your email address.": "En ny verifieringslänk har skickats till din e-postadress.",
     "Save": "Spara",
-    "Lunch Poll": "Lunchröstning"
+    "Lunch Poll": "Lunchröstning",
+    "Made by Filip Sjölander": "Skapad av Filip Sjölander"
 }
