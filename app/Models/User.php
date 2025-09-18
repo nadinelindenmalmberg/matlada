@@ -6,11 +6,21 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
+
+    /**
+     * The accessors to append to the model's array form.
+     *
+     * @var list<string>
+     */
+    protected $appends = [
+        'avatar_url',
+    ];
 
     /**
      * The attributes that are mass assignable.
@@ -53,5 +63,24 @@ class User extends Authenticatable
     public function dayStatuses()
     {
         return $this->hasMany(UserDayStatus::class);
+    }
+
+    /**
+     * Get the absolute URL to the user's avatar image.
+     */
+    public function getAvatarUrlAttribute(): ?string
+    {
+        $avatar = $this->attributes['avatar'] ?? null;
+
+        if ($avatar === null || $avatar === '') {
+            return null;
+        }
+
+        if (str_starts_with($avatar, 'http://') || str_starts_with($avatar, 'https://')) {
+            return $avatar;
+        }
+
+        // Use the configured public disk URL to generate a correct absolute URL
+        return Storage::disk('public')->url($avatar);
     }
 }

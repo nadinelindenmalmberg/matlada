@@ -39,6 +39,16 @@
     "No matches": "Inga träffar",
     "Not needed": "Behövs ej",
     "Clear": "Rensa",
+    "Copy day": "Kopiera dag",
+    "Paste day": "Klistra in dag",
+    "Set for all coming days": "Sätt för alla kommande dagar",
+    "No coming days to update.": "Inga kommande dagar att uppdatera.",
+    "Copied!": "Kopierat!",
+    "Pasted!": "Inklistrat!",
+    "Cleared": "Rensat",
+    "Failed to save. Please try again.": "Det gick inte att spara. Försök igen.",
+    "Failed to clear. Please try again.": "Det gick inte att rensa. Försök igen.",
+    "Set for coming days!": "Satt för kommande dagar!",
     "Clear status": "Rensa status",
     "Welcome": "Välkommen",
     "Dashboard": "Översikt",
@@ -96,5 +106,8 @@
     "A new verification link has been sent to your email address.": "En ny verifieringslänk har skickats till din e-postadress.",
     "Save": "Spara",
     "Lunch Poll": "Lunchröstning",
-    "Made by Filip Sjölander": "Skapad av Filip Sjölander"
+    "Made by Filip Sjölander": "Skapad av Filip Sjölander",
+    "Hint: Right click your cell for more actions": "Tips: Högerklicka på en av dina dagar för fler åtgärder",
+    "Paste": "Klistra in",
+    "Copy": "Kopiera"
 }

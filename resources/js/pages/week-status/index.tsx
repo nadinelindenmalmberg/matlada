@@ -5,6 +5,13 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
+// import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
+import { Icon } from '@/components/ui/icon';
+import { Copy as CopyIcon, ClipboardPaste as PasteIcon, Eraser as EraserIcon, CalendarRange as CalendarRangeIcon } from 'lucide-react';
+import { toast } from 'sonner';
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuSeparator, ContextMenuTrigger } from '@/components/ui/context-menu';
 import AppLayout from '@/layouts/app-layout';
 import { BreadcrumbItem } from '@/types';
 import { dashboard } from '@/routes';
@@ -17,6 +24,12 @@ type UserDayRow = {
     id: number;
     user_id: number;
     weekday: number;
+    status: StatusValue;
+    arrival_time: string | null;
+    location: string | null;
+};
+
+type CopiedData = {
     status: StatusValue;
     arrival_time: string | null;
     location: string | null;
@@ -121,12 +134,15 @@ function isSameLocalDate(a: Date, b: Date): boolean {
 
 export default function WeekStatusIndex() {
     const { week, users, statuses, canEditUserId, activeWeekday } = usePage<PageProps>().props;
-    const [processing, setProcessing] = React.useState(false);
+    // Removed global processing state for seamless UX
     const [draftLocations, setDraftLocations] = React.useState<Record<string, string>>({});
     const locationDebounceRef = React.useRef<Record<string, ReturnType<typeof setTimeout>>>({});
     const skipBlurSubmitRef = React.useRef<Record<string, boolean>>({});
     const defaultLocations = React.useMemo(() => ['Bulten', 'Lindholmen'], []);
     const [openCombos, setOpenCombos] = React.useState<Record<string, boolean>>({});
+    const [copiedData, setCopiedData] = React.useState<CopiedData | null>(null);
+    // No global/batch loading states to keep interactions seamless
+    // const [confirmSetAllOpen, setConfirmSetAllOpen] = React.useState<Record<number, boolean>>({});
     const { t } = useI18n();
     const getInitials: (name: string) => string = useInitials();
     const weekdays = useWeekdaysLabels(t);
@@ -151,8 +167,7 @@ export default function WeekStatusIndex() {
             {
                 preserveScroll: true,
                 preserveState: true,
-                onStart: () => setProcessing(true),
-                onFinish: () => setProcessing(false),
+                onError: () => toast.error(t('Failed to save. Please try again.', 'Failed to save. Please try again.')),
             }
         );
     }
@@ -195,9 +210,70 @@ export default function WeekStatusIndex() {
             data: { iso_week: week, weekday },
             preserveScroll: true,
             preserveState: false,
-            onStart: () => setProcessing(true),
-            onFinish: () => setProcessing(false),
+            onSuccess: () => toast.success(t('Cleared', 'Cleared')),
+            onError: () => toast.error(t('Failed to clear. Please try again.', 'Failed to clear. Please try again.')),
         });
+    }
+
+    // function hasOtherDaysFilled(selectedWeekday: number): boolean {
+    //     // Check if any other day for the current user has any data filled
+    //     return weekdays
+    //         .map((d) => d.value)
+    //         .filter((w) => w !== selectedWeekday)
+    //         .some((w) => {
+    //             const row = getUserDay(statuses, canEditUserId, w);
+    //             if (!row) return false;
+    //             return !!(row.status || row.arrival_time || row.location);
+    //         });
+    // }
+
+    function copyDayData(weekday: number) {
+        const current = getUserDay(statuses, canEditUserId, weekday);
+        const data: CopiedData = {
+            status: current?.status ?? null,
+            arrival_time: current?.arrival_time ?? null,
+            location: current?.location ?? null,
+        };
+        setCopiedData(data);
+        toast.info(t('Copied!', 'Copied!'));
+    }
+
+    function pasteDayData(weekday: number) {
+        if (!copiedData) return;
+
+        const { status, arrival_time, location } = copiedData;
+        submitUpdate(weekday, status, arrival_time, location);
+        toast.success(t('Pasted!', 'Pasted!'));
+    }
+
+    function setForAllDays(weekday: number) {
+        const current = getUserDay(statuses, canEditUserId, weekday);
+        const data: CopiedData = {
+            status: current?.status ?? null,
+            arrival_time: current?.arrival_time ?? null,
+            location: current?.location ?? null,
+        };
+
+        // Only apply to coming days (future days in the same week)
+        const otherDays = weekdays.map((d) => d.value).filter((v) => v > weekday);
+        if (otherDays.length === 0) {
+            toast.info(t('No coming days to update.', 'No coming days to update.'));
+            return;
+        }
+
+        // Batch apply without blocking UI
+
+        const delayMs = 250;
+        otherDays.forEach((day, index) => {
+            setTimeout(() => {
+                submitUpdate(day, data.status, data.arrival_time, data.location);
+            }, index * delayMs);
+        });
+
+        const totalDuration = otherDays.length * delayMs + 150; // small buffer
+        setTimeout(() => {
+            toast.success(t('Set for coming days!', 'Set for coming days!'));
+        }, totalDuration);
     }
 
     return (
@@ -205,9 +281,17 @@ export default function WeekStatusIndex() {
 
             <Head title={`${t('Week', 'Week')} ${displayWeek}`} />
             <div className="p-3">
-                <Badge className="text-sm font-medium flex items-center gap-2 mb-3">
-                    <span>{t('Week', 'Week')} {displayWeek}</span>
-                </Badge>
+                <div className="flex items-center justify-between mb-3">
+                    <Badge className="text-sm font-medium flex items-center gap-2">
+                        <span>{t('Week', 'Week')} {displayWeek}</span>
+                    </Badge>
+                    <span
+                        className="inline-flex items-center gap-2 h-7 px-2 rounded-md border text-xs text-muted-foreground bg-background"
+                        aria-label={t('Hint: Right click your cell for actions', 'Hint: Right click your cell for actions')}
+                    >
+                        {t('Hint: Right click your cell for more actions', 'Right click your cell for more actions')}
+                    </span>
+                </div>
                 {/* Mobile day navigation */}
                 <div className="sm:hidden mb-3 flex items-center justify-between">
                     <button
@@ -259,7 +343,7 @@ export default function WeekStatusIndex() {
                             </TableHeader>
                             <TableBody>
                                 {users.map((u) => (
-                                    <TableRow key={u.id} className="group">
+                                    <TableRow key={u.id}>
                                         <TableCell className="whitespace-nowrap align-middle p-2 w-[150px] min-w-[150px]">
                                             <div className="flex items-center gap-2">
                                                 <Avatar className="h-8 w-8 overflow-hidden rounded-full">
@@ -268,8 +352,7 @@ export default function WeekStatusIndex() {
                                                         {getInitials(u.name)}
                                                     </AvatarFallback>
                                                 </Avatar>
-                                                <span className="font-medium sm:hidden">{getInitials(u.name)}</span>
-                                                <span className="font-medium hidden sm:inline">{u.name}</span>
+                                                <span className="font-medium">{u.name}</span>
                                             </div>
                                         </TableCell>
                                         {weekdays.map((d) => {
@@ -280,175 +363,326 @@ export default function WeekStatusIndex() {
                                             const cellKey = getCellKey(u.id, d.value);
                                             const locationValue = (draftLocations[cellKey] ?? (current?.location ?? ''));
                                             return (
-                                                <TableCell key={d.value} className={`border-l align-middle p-2 w-[150px] min-w-[150px] ${d.value !== activeDayMobile ? 'hidden sm:table-cell' : ''}`}>
-                                                <div className="flex flex-col gap-1.5 w-full">
-                                                        <div className="flex items-center gap-2">
-                                                            <span className={`text-[11px] text-muted-foreground inline-block text-right ${isSelf ? 'sm:w-11 w-12' : 'sm:w-11 w-12'}`}>{t('Lunch', 'Lunch')}:</span>
-                                                            {isSelf ? (
-                                                                <Select onValueChange={(v) => {
-                                                                    if (v === '__clear__') {
-                                                                        clearStatus(d.value);
-                                                                        return;
-                                                                    }
-                                                                    const newStatus = (v || null) as StatusValue;
-                                                                    const nextTime = newStatus === 'Home' ? null : (timeValue || null);
-                                                                    const nextLocation = newStatus === 'Home' ? null : (locationValue || null);
-                                                                    submitUpdate(d.value, newStatus, nextTime, nextLocation);
-                                                                }} value={value ?? undefined as unknown as string}>
-                                                                    <SelectTrigger className={`h-8 px-2 w-full sm:w-auto [&>svg]:text-current [&>svg]:opacity-90 ${value ? getStatusBadgeClass(value) : ''}`} disabled={processing}>
-                                                                        <SelectValue placeholder={t('Lunch', 'Lunch')} />
-                                                                    </SelectTrigger>
-                                                                    <SelectContent>
-                                                                        <SelectItem value="Lunchbox" className="group w-full">
-                                                                            <Badge variant={getStatusBadgeVariant('Lunchbox')} className={`w-full justify-center ${getStatusBadgeClass('Lunchbox')} ${getBadgeSizeClass('Lunchbox')} tracking-tight`}>
-                                                                                {t('Lunchbox', 'Lunchbox')}
-                                                                            </Badge>
-                                                                        </SelectItem>
-                                                                        <SelectItem value="Buying" className="group w-full">
-                                                                            <Badge variant={getStatusBadgeVariant('Buying')} className={`w-full justify-center ${getStatusBadgeClass('Buying')} ${getBadgeSizeClass('Buying')} tracking-tight`}>
-                                                                                {t('Buying', 'Buying')}
-                                                                            </Badge>
-                                                                        </SelectItem>
-                                                                        <SelectItem value="Home" className="group w-full">
-                                                                            <Badge variant={getStatusBadgeVariant('Home')} className={`w-full justify-center ${getStatusBadgeClass('Home')} ${getBadgeSizeClass('Home')} tracking-tight`}>
-                                                                                {t('Home', 'Home')}
-                                                                            </Badge>
-                                                                        </SelectItem>
-                                                                        <div className="my-1 h-px w-full bg-muted" />
-                                                                        <SelectItem value="__clear__" disabled={!value && !timeValue && !locationValue} className="group w-full">
-                                                                            <Badge className="w-full justify-center text-sm font-medium bg-zinc-800 text-white border-transparent hover:bg-zinc-700 dark:bg-zinc-700 dark:hover:bg-zinc-600 tracking-tight">
-                                                                                {t('Clear', 'Clear')}
-                                                                            </Badge>
-                                                                        </SelectItem>
-                                                                    </SelectContent>
-                                                                </Select>
-                                                            ) : (
-                                                                value ? (
-                                                                    <Badge variant={getStatusBadgeVariant(value)} className={`${getStatusBadgeClass(value)} ${getBadgeSizeClass(value)}`}>{
+                                                <TableCell key={d.value} className={`group border-l align-middle p-2 w-[150px] min-w-[150px] ${d.value !== activeDayMobile ? 'hidden sm:table-cell' : ''}`}>
+                                                    {isSelf ? (
+                                                        <ContextMenu>
+                                                            <ContextMenuTrigger asChild>
+                                                                <div className="relative flex flex-col gap-1.5 w-full sm:pr-16">
+                                                                    {/* Mobile action buttons */}
+                                                                    {isSelf && (
+                                                                        <div className="flex sm:hidden justify-end gap-1 mb-1">
+                                                                            <Button
+                                                                                type="button"
+                                                                                variant="outline"
+                                                                                size="icon"
+                                                                                className={`size-7 ${!copiedData ? 'opacity-50' : ''}`}
+                                                                                aria-label={t('Paste', 'Paste')}
+                                                                                onClick={() => copiedData && pasteDayData(d.value)}
+                                                                                disabled={!copiedData}
+                                                                            >
+                                                                                <Icon iconNode={PasteIcon} className="size-4" />
+                                                                            </Button>
+                                                                            <Button
+                                                                                type="button"
+                                                                                variant="outline"
+                                                                                size="icon"
+                                                                                className="size-7"
+                                                                                aria-label={t('Copy day', 'Copy day')}
+                                                                                onClick={() => copyDayData(d.value)}
+                                                                            >
+                                                                                <Icon iconNode={CopyIcon} className="size-4" />
+                                                                            </Button>
+                                                                        </div>
+                                                                    )}
+                                                                    {/* Desktop action buttons */}
+                                                                    {isSelf && (
+                                                                        <div className="hidden sm:flex absolute top-1 right-1 gap-1 items-center z-20">
+                                                                            <Tooltip>
+                                                                                <TooltipTrigger asChild>
+                                                                                    <Button
+                                                                                        type="button"
+                                                                                        variant="ghost"
+                                                                                        size="icon"
+                                                                                        className={`size-6 ${!copiedData ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                                                                        aria-label={t('Paste', 'Paste')}
+                                                                                        onClick={() => copiedData && pasteDayData(d.value)}
+                                                                                        disabled={!copiedData}
+                                                                                    >
+                                                                                        <Icon iconNode={PasteIcon} className="size-4" />
+                                                                                    </Button>
+                                                                                </TooltipTrigger>
+                                                                                <TooltipContent>{t('Paste', 'Paste')}</TooltipContent>
+                                                                            </Tooltip>
+                                                                            <Tooltip>
+                                                                                <TooltipTrigger asChild>
+                                                                                    <Button
+                                                                                        type="button"
+                                                                                        variant="ghost"
+                                                                                        size="icon"
+                                                                                        className="size-6 opacity-60 hover:opacity-100 transition-opacity"
+                                                                                        aria-label={t('Copy day', 'Copy day')}
+                                                                                        onClick={() => copyDayData(d.value)}
+                                                                                    >
+                                                                                        <Icon iconNode={CopyIcon} className="size-4" />
+                                                                                    </Button>
+                                                                                </TooltipTrigger>
+                                                                                <TooltipContent>{t('Copy day', 'Copy day')}</TooltipContent>
+                                                                            </Tooltip>
+                                                                        </div>
+                                                                    )}
+                                                                    <div className="flex items-center gap-2">
+                                                                        <span className={`text-[10px] font-medium text-muted-foreground uppercase tracking-wide inline-block text-right ${isSelf ? 'sm:w-11 w-12' : 'sm:w-11 w-12'}`}>{t('Lunch', 'Lunch')}</span>
+                                                                        {isSelf ? (
+                                                                            <div className="flex-1 min-w-0">
+                                                                                <Select onValueChange={(v) => {
+                                                                                    if (v === '__clear__') {
+                                                                                        clearStatus(d.value);
+                                                                                        return;
+                                                                                    }
+                                                                                    const newStatus = (v || null) as StatusValue;
+                                                                                    const nextTime = newStatus === 'Home' ? null : (timeValue || null);
+                                                                                    const nextLocation = newStatus === 'Home' ? null : (locationValue || null);
+                                                                                    submitUpdate(d.value, newStatus, nextTime, nextLocation);
+                                                                                }} value={value ?? undefined as unknown as string}>
+                                                                                    <SelectTrigger className={`h-8 px-2 w-full [&>svg]:text-current [&>svg]:opacity-90 font-medium ${value ? getStatusBadgeClass(value) : ''}`}>
+                                                                                        <SelectValue placeholder={t('Lunch', 'Lunch')} />
+                                                                                    </SelectTrigger>
+                                                                                    <SelectContent>
+                                                                                        <SelectItem value="Lunchbox" className="group w-full">
+                                                                                            <Badge variant={getStatusBadgeVariant('Lunchbox')} className={`w-full justify-center ${getStatusBadgeClass('Lunchbox')} ${getBadgeSizeClass('Lunchbox')} tracking-tight`}>
+                                                                                                {t('Lunchbox', 'Lunchbox')}
+                                                                                            </Badge>
+                                                                                        </SelectItem>
+                                                                                        <SelectItem value="Buying" className="group w-full">
+                                                                                            <Badge variant={getStatusBadgeVariant('Buying')} className={`w-full justify-center ${getStatusBadgeClass('Buying')} ${getBadgeSizeClass('Buying')} tracking-tight`}>
+                                                                                                {t('Buying', 'Buying')}
+                                                                                            </Badge>
+                                                                                        </SelectItem>
+                                                                                        <SelectItem value="Home" className="group w-full">
+                                                                                            <Badge variant={getStatusBadgeVariant('Home')} className={`w-full justify-center ${getStatusBadgeClass('Home')} ${getBadgeSizeClass('Home')} tracking-tight`}>
+                                                                                                {t('Home', 'Home')}
+                                                                                            </Badge>
+                                                                                        </SelectItem>
+                                                                                        {/* Clear moved next to Copy/Paste/Set all */}
+                                                                                    </SelectContent>
+                                                                                </Select>
+                                                                            </div>
+                                                                        ) : (
+                                                                            value ? (
+                                                                                <Badge variant={getStatusBadgeVariant(value)} className={`${getStatusBadgeClass(value)} ${getBadgeSizeClass(value)}`}>{
+                                                                                    value === 'Lunchbox' ? t('Lunchbox', 'Lunchbox') : value === 'Buying' ? t('Buying', 'Buying') : t('Home', 'Home')
+                                                                                }</Badge>
+                                                                            ) : (
+
+                                                                                <span className="text-xs text-muted-foreground">—</span>
+                                                                            )
+                                                                        )}
+                                                                    </div>
+                                                                    <div className="flex items-center gap-2">
+                                                                        <span className={`text-[10px] font-medium text-muted-foreground uppercase tracking-wide inline-block text-right ${isSelf ? 'sm:w-11 w-12' : 'sm:w-11 w-12'}`}>{t('Arrival', 'Arrival')}</span>
+                                                                        {value !== 'Home' ? (
+                                                                            isSelf ? (
+                                                                                <div className="flex-1 min-w-0">
+                                                                                    <Input
+                                                                                        type="time"
+                                                                                        step="60"
+                                                                                        aria-label={t('Arrival time to school', 'Arrival time to school')}
+                                                                                        title={t('Arrival time to school', 'Arrival time to school')}
+                                                                                        className={`h-8 w-full bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none font-medium ${!timeValue ? 'text-muted-foreground' : 'text-foreground'}`}
+                                                                                        value={timeValue || ''}
+                                                                                        onChange={(e) => submitUpdate(d.value, value, e.target.value || null, locationValue || null)}
+                                                                                    />
+                                                                                </div>
+                                                                            ) : (
+                                                                                <span className={timeValue ? "text-xs" : "text-xs text-muted-foreground"}>{timeValue || '—'}</span>
+                                                                            )
+                                                                        ) : (
+                                                                            isSelf ? (
+                                                                                <div className="flex-1 min-w-0">
+                                                                                    <Input
+                                                                                        type="time"
+                                                                                        step="60"
+                                                                                        aria-label={t('Arrival time not needed', 'Arrival time not needed')}
+                                                                                        title={t('Arrival time not needed', 'Arrival time not needed')}
+                                                                                        className="h-8 w-full bg-muted text-muted-foreground"
+                                                                                        value={''}
+                                                                                        disabled
+                                                                                        readOnly
+                                                                                    />
+                                                                                </div>
+                                                                            ) : (
+                                                                                <span className="text-xs text-muted-foreground">—</span>
+                                                                            )
+                                                                        )}
+                                                                    </div>
+                                                                    <div className="flex items-center gap-2">
+                                                                        <span className={`text-[10px] font-medium text-muted-foreground uppercase tracking-wide inline-block text-right ${isSelf ? 'sm:w-11 w-12' : 'sm:w-11 w-12'}`}>{t('Location', 'Location')}</span>
+                                                                        {value !== 'Home' ? (
+                                                                            isSelf ? (
+                                                                                <div className="relative flex-1 min-w-0 sm:min-w-[100px]">
+                                                                                    <input
+                                                                                        type="text"
+                                                                                        className="h-8 w-full rounded-md border bg-background px-2 text-sm font-medium"
+                                                                                        role="combobox"
+                                                                                        aria-expanded={!!openCombos[cellKey]}
+                                                                                        aria-controls={`location-combobox-${cellKey}`}
+                                                                                        list="default-locations"
+                                                                                        placeholder={t('Where you will be at that time', 'Where you will be at that time')}
+                                                                                        aria-label={t('Location where you will be at that time', 'Location where you will be at that time')}
+                                                                                        value={locationValue}
+                                                                                        onChange={(e) => {
+                                                                                            const v = e.target.value;
+                                                                                            setDraftLocations((prev) => ({ ...prev, [cellKey]: v }));
+                                                                                            setOpenCombos((prev) => ({ ...prev, [cellKey]: true }));
+                                                                                            scheduleLocationSubmit(u.id, d.value, value, timeValue || null, v || null);
+                                                                                        }}
+                                                                                        onFocus={() => setOpenCombos((prev) => ({ ...prev, [cellKey]: true }))}
+                                                                                        onBlur={() => {
+                                                                                            setTimeout(() => setOpenCombos((prev) => ({ ...prev, [cellKey]: false })), 150);
+                                                                                            if (!skipBlurSubmitRef.current[cellKey]) {
+                                                                                                scheduleLocationSubmit(u.id, d.value, value, timeValue || null, (locationValue || null));
+                                                                                            }
+                                                                                            if (skipBlurSubmitRef.current[cellKey]) {
+                                                                                                delete skipBlurSubmitRef.current[cellKey];
+                                                                                            }
+                                                                                        }}
+
+                                                                                    />
+                                                                                    {openCombos[cellKey] && (
+                                                                                        <div id={`location-combobox-${cellKey}`} className="absolute z-10 mt-1 left-0 right-0 rounded-md border bg-popover shadow-md">
+                                                                                            {defaultLocations
+                                                                                                .filter((loc) => loc.toLowerCase().includes((locationValue || '').toLowerCase()))
+                                                                                                .map((loc) => (
+                                                                                                    <button
+                                                                                                        type="button"
+                                                                                                        key={loc}
+                                                                                                        className="w-full px-2 py-1.5 text-left text-sm hover:bg-accent"
+                                                                                                        onMouseDown={(e) => {
+                                                                                                            e.preventDefault();
+                                                                                                            skipBlurSubmitRef.current[cellKey] = true;
+                                                                                                        }}
+                                                                                                        onClick={() => {
+                                                                                                            setDraftLocations((prev) => ({ ...prev, [cellKey]: loc }));
+                                                                                                            setOpenCombos((prev) => ({ ...prev, [cellKey]: false }));
+                                                                                                            submitLocationImmediately(u.id, d.value, value, timeValue || null, loc);
+                                                                                                        }}
+                                                                                                    >
+                                                                                                        {loc}
+                                                                                                    </button>
+                                                                                                ))}
+                                                                                            {defaultLocations.filter((loc) => loc.toLowerCase().includes((locationValue || '').toLowerCase())).length === 0 && (
+                                                                                                <div className="px-2 py-1.5 text-sm text-muted-foreground">{t('No matches', 'No matches')}</div>
+                                                                                            )}
+                                                                                        </div>
+                                                                                    )}
+                                                                                </div>
+                                                                            ) : (
+                                                                                <span className={locationValue ? "text-xs" : "text-xs text-muted-foreground"}>{locationValue || '—'}</span>
+                                                                            )
+                                                                        ) : (
+                                                                            isSelf ? (
+                                                                                <div className="relative flex-1 min-w-0 sm:min-w-[100px]">
+                                                                                    <input
+                                                                                        type="text"
+                                                                                        className="h-8 w-full rounded-md border bg-muted px-2 text-sm text-muted-foreground"
+                                                                                        placeholder={t('Not needed', 'Not needed')}
+                                                                                        value=""
+                                                                                        disabled
+                                                                                        readOnly
+                                                                                    />
+                                                                                </div>
+                                                                            ) : (
+                                                                                <span className="text-xs text-muted-foreground">—</span>
+                                                                            )
+                                                                        )}
+                                                                    </div>
+                                                                    {null}
+                                                                </div>
+                                                            </ContextMenuTrigger>
+                                                            <ContextMenuContent>
+                                                                <ContextMenuItem onClick={() => clearStatus(d.value)} disabled={!value && !timeValue && !locationValue}>
+                                                                    <Icon iconNode={EraserIcon} className="size-4" />
+                                                                    {t('Clear', 'Clear')}
+                                                                </ContextMenuItem>
+                                                                <ContextMenuSeparator />
+                                                                <ContextMenuItem
+                                                                    onClick={() => copyDayData(d.value)}
+                                                                    disabled={!value && !timeValue && !locationValue}
+                                                                    className={(!value && !timeValue && !locationValue) ? 'opacity-50' : ''}
+                                                                >
+                                                                    <Icon iconNode={CopyIcon} className="size-4" />
+                                                                    {t('Copy day', 'Copy day')}
+                                                                </ContextMenuItem>
+                                                                <ContextMenuItem
+                                                                    onClick={() => pasteDayData(d.value)}
+                                                                    disabled={!copiedData}
+                                                                    className={!copiedData ? 'opacity-50' : ''}
+                                                                >
+                                                                    <Icon iconNode={PasteIcon} className="size-4" />
+                                                                    {t('Paste day', 'Paste day')}
+                                                                </ContextMenuItem>
+                                                                <ContextMenuSeparator />
+                                                                <ContextMenuItem onClick={() => setForAllDays(d.value)}>
+                                                                    <Icon iconNode={CalendarRangeIcon} className="size-4" />
+                                                                    {t('Set for all coming days', 'Set for all coming days')}
+                                                                </ContextMenuItem>
+                                                            </ContextMenuContent>
+                                                        </ContextMenu>
+                                                    ) : (
+                                                        <div className="relative flex flex-col gap-1.5 w-full">
+                                                            <div className="absolute top-1 right-1 flex gap-1 items-center">
+                                                                <Tooltip>
+                                                                    <TooltipTrigger asChild>
+                                                                        <Button
+                                                                            type="button"
+                                                                            variant="ghost"
+                                                                            size="icon"
+                                                                            className="size-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                                            aria-label={t('Copy day', 'Copy day')}
+                                                                            onClick={() => {
+                                                                                const data: CopiedData = {
+                                                                                    status: value,
+                                                                                    arrival_time: timeValue || null,
+                                                                                    location: locationValue || null,
+                                                                                };
+                                                                                setCopiedData(data);
+                                                                                toast.info(t('Copied!', 'Copied!'));
+                                                                            }}
+                                                                        >
+                                                                            <Icon iconNode={CopyIcon} className="size-4" />
+                                                                        </Button>
+                                                                    </TooltipTrigger>
+                                                                    <TooltipContent>{t('Copy day', 'Copy day')}</TooltipContent>
+                                                                </Tooltip>
+                                                            </div>
+                                                            <div className="flex items-center gap-2">
+                                                                <span className={`text-[10px] font-medium text-muted-foreground uppercase tracking-wide inline-block text-right ${isSelf ? 'sm:w-11 w-12' : 'sm:w-11 w-12'}`}>{t('Lunch', 'Lunch')}</span>
+                                                                {value ? (
+                                                                    <Badge variant={getStatusBadgeVariant(value)} className={`${getStatusBadgeClass(value)} ${getBadgeSizeClass(value)} font-semibold`}>{
                                                                         value === 'Lunchbox' ? t('Lunchbox', 'Lunchbox') : value === 'Buying' ? t('Buying', 'Buying') : t('Home', 'Home')
                                                                     }</Badge>
                                                                 ) : (
-
-                                                                    <span className="text-xs text-muted-foreground">—</span>
-                                                                )
-                                                            )}
+                                                                    <span className="text-xs text-muted-foreground font-medium">—</span>
+                                                                )}
+                                                            </div>
+                                                            <div className="flex items-center gap-2">
+                                                                <span className={`text-[10px] font-medium text-muted-foreground uppercase tracking-wide inline-block text-right ${isSelf ? 'sm:w-11 w-12' : 'sm:w-11 w-12'}`}>{t('Arrival', 'Arrival')}</span>
+                                                                {value !== 'Home' ? (
+                                                                    <span className={timeValue ? "text-xs font-semibold text-foreground" : "text-xs text-muted-foreground font-medium"}>{timeValue || '—'}</span>
+                                                                ) : (
+                                                                    <span className="text-xs text-muted-foreground font-medium">—</span>
+                                                                )}
+                                                            </div>
+                                                            <div className="flex items-center gap-2">
+                                                                <span className={`text-[10px] font-medium text-muted-foreground uppercase tracking-wide inline-block text-right ${isSelf ? 'sm:w-11 w-12' : 'sm:w-11 w-12'}`}>{t('Location', 'Location')}</span>
+                                                                {value !== 'Home' ? (
+                                                                    <span className={locationValue ? "text-xs font-semibold text-foreground" : "text-xs text-muted-foreground font-medium"}>{locationValue || '—'}</span>
+                                                                ) : (
+                                                                    <span className="text-xs text-muted-foreground font-medium">—</span>
+                                                                )}
+                                                            </div>
                                                         </div>
-                                                        <div className="flex items-center gap-2">
-                                                            <span className={`text-[11px] text-muted-foreground inline-block text-right ${isSelf ? 'sm:w-11 w-12' : 'sm:w-11 w-12'}`}>{t('Arrival', 'Arrival')}:</span>
-                                                            {value !== 'Home' ? (
-                                                                isSelf ? (
-                                                                    <Input
-                                                                        type="time"
-                                                                        step="60"
-                                                                        aria-label={t('Arrival time to school', 'Arrival time to school')}
-                                                                        title={t('Arrival time to school', 'Arrival time to school')}
-                                                                        className={`h-8 w-full sm:w-auto bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none ${!timeValue ? 'text-muted-foreground' : ''}`}
-                                                                        value={timeValue || ''}
-                                                                        onChange={(e) => submitUpdate(d.value, value, e.target.value || null, locationValue || null)}
-                                                                        disabled={processing}
-                                                                    />
-                                                                ) : (
-                                                                    <span className={timeValue ? "text-xs" : "text-xs text-muted-foreground"}>{timeValue || '—'}</span>
-                                                                )
-                                                            ) : (
-                                                                isSelf ? (
-                                                                    <Input
-                                                                        type="time"
-                                                                        step="60"
-                                                                        aria-label={t('Arrival time not needed', 'Arrival time not needed')}
-                                                                        title={t('Arrival time not needed', 'Arrival time not needed')}
-                                                                        className="h-8 w-full sm:w-auto bg-muted text-muted-foreground"
-                                                                        value={''}
-                                                                        disabled
-                                                                        readOnly
-                                                                    />
-                                                                ) : (
-                                                                    <span className="text-xs text-muted-foreground">—</span>
-                                                                )
-                                                            )}
-                                                        </div>
-                                                        <div className="flex items-center gap-2">
-                                                            <span className={`text-[11px] text-muted-foreground inline-block text-right ${isSelf ? 'sm:w-11 w-12' : 'sm:w-11 w-12'}`}>{t('Location', 'Location')}:</span>
-                                                            {value !== 'Home' ? (
-                                                                isSelf ? (
-                                                                    <div className="relative flex-1 min-w-0 sm:min-w-[100px]">
-                                                                        <input
-                                                                            type="text"
-                                                                            className="h-8 w-full rounded-md border bg-background px-2 text-sm"
-                                                                            role="combobox"
-                                                                            aria-expanded={!!openCombos[cellKey]}
-                                                                            aria-controls={`location-combobox-${cellKey}`}
-                                                                            list="default-locations"
-                                                                            placeholder={t('Where you will be at that time', 'Where you will be at that time')}
-                                                                            aria-label={t('Location where you will be at that time', 'Location where you will be at that time')}
-                                                                            value={locationValue}
-                                                                            onChange={(e) => {
-                                                                                const v = e.target.value;
-                                                                                setDraftLocations((prev) => ({ ...prev, [cellKey]: v }));
-                                                                                setOpenCombos((prev) => ({ ...prev, [cellKey]: true }));
-                                                                                scheduleLocationSubmit(u.id, d.value, value, timeValue || null, v || null);
-                                                                            }}
-                                                                            onFocus={() => setOpenCombos((prev) => ({ ...prev, [cellKey]: true }))}
-                                                                            onBlur={() => {
-                                                                                setTimeout(() => setOpenCombos((prev) => ({ ...prev, [cellKey]: false })), 150);
-                                                                                if (!skipBlurSubmitRef.current[cellKey]) {
-                                                                                    scheduleLocationSubmit(u.id, d.value, value, timeValue || null, (locationValue || null));
-                                                                                }
-                                                                                if (skipBlurSubmitRef.current[cellKey]) {
-                                                                                    delete skipBlurSubmitRef.current[cellKey];
-                                                                                }
-                                                                            }}
-                                                                            disabled={processing}
-                                                                        />
-                                                                        {openCombos[cellKey] && (
-                                                                            <div id={`location-combobox-${cellKey}`} className="absolute z-10 mt-1 left-0 right-0 rounded-md border bg-popover shadow-md">
-                                                                                {defaultLocations
-                                                                                    .filter((loc) => loc.toLowerCase().includes((locationValue || '').toLowerCase()))
-                                                                                    .map((loc) => (
-                                                                                        <button
-                                                                                            type="button"
-                                                                                            key={loc}
-                                                                                            className="w-full px-2 py-1.5 text-left text-sm hover:bg-accent"
-                                                                                            onMouseDown={(e) => {
-                                                                                                e.preventDefault();
-                                                                                                skipBlurSubmitRef.current[cellKey] = true;
-                                                                                            }}
-                                                                                            onClick={() => {
-                                                                                                setDraftLocations((prev) => ({ ...prev, [cellKey]: loc }));
-                                                                                                setOpenCombos((prev) => ({ ...prev, [cellKey]: false }));
-                                                                                                submitLocationImmediately(u.id, d.value, value, timeValue || null, loc);
-                                                                                            }}
-                                                                                        >
-                                                                                            {loc}
-                                                                                        </button>
-                                                                                    ))}
-                                                                                {defaultLocations.filter((loc) => loc.toLowerCase().includes((locationValue || '').toLowerCase())).length === 0 && (
-                                                                                    <div className="px-2 py-1.5 text-sm text-muted-foreground">{t('No matches', 'No matches')}</div>
-                                                                                )}
-                                                                            </div>
-                                                                        )}
-                                                                    </div>
-                                                                ) : (
-                                                                    <span className={locationValue ? "text-xs" : "text-xs text-muted-foreground"}>{locationValue || '—'}</span>
-                                                                )
-                                                            ) : (
-                                                                isSelf ? (
-                                                                    <div className="relative flex-1 min-w-0 sm:min-w-[100px]">
-                                                                        <input
-                                                                            type="text"
-                                                                            className="h-8 w-full rounded-md border bg-muted px-2 text-sm text-muted-foreground"
-                                                                            placeholder={t('Not needed', 'Not needed')}
-                                                                            value=""
-                                                                            disabled
-                                                                            readOnly
-                                                                        />
-                                                                    </div>
-                                                                ) : (
-                                                                    <span className="text-xs text-muted-foreground">—</span>
-                                                                )
-                                                            )}
-                                                        </div>
-                                                    </div>
+                                                    )}
                                                 </TableCell>
                                             );
                                         })}
