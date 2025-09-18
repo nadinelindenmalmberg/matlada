@@ -59,29 +59,28 @@ function getStatusBadgeVariant(status: StatusValue): React.ComponentProps<typeof
 }
 
 function getStatusBadgeClass(status: StatusValue): string {
-    // Override theme colors with requested hex colors
+    // Tailwind utility colors with dark mode variants
     if (status === 'Lunchbox') {
-        // Green (#28a745)
-        return 'bg-[#28a745] text-white border-transparent hover:bg-[#28a745]/90';
+        // Emerald (matched lightness) ensure max contrast
+        return 'bg-emerald-600 text-white border-transparent hover:bg-emerald-700 dark:bg-emerald-800 dark:hover:bg-emerald-400 dark:text-white';
     }
     if (status === 'Buying') {
-        // Orange/Amber (#FFC107)
-        return 'bg-[#FFC107] text-black border-transparent hover:bg-[#FFC107]/90';
+        // Amber (matched lightness) with dark text for better contrast
+        return 'bg-amber-600 text-white border-transparent hover:bg-amber-700 dark:bg-amber-800 dark:hover:bg-amber-400 dark:text-white';
     }
     if (status === 'Home') {
-        // Red (Bootstrap danger red #DC3545)
-        return 'bg-[#DC3545] text-white border-transparent hover:bg-[#DC3545]/90';
+        // Rose (matched lightness) ensure max contrast
+        return 'bg-rose-600 text-white border-transparent hover:bg-rose-700 dark:bg-rose-800 dark:hover:bg-rose-400 dark:text-white';
     }
     return '';
 }
 
 function getBadgeSizeClass(status: StatusValue): string {
-    // Keep badges compact so they don't stretch table cells
-    // Slightly smaller for 'Hemma' since color makes it feel heavier
+    // Slightly larger text for better readability
     if (status === 'Home') {
-        return 'text-xs py-0 px-2 whitespace-nowrap';
+        return 'text-sm py-0 px-2 whitespace-nowrap';
     }
-    return 'text-xs py-0.5 px-2 whitespace-nowrap';
+    return 'text-sm py-0.5 px-2 whitespace-nowrap';
 }
 
 function buildBreadcrumbs(t: (key: string, fallback?: string) => string): BreadcrumbItem[] {
@@ -115,7 +114,6 @@ function formatDateYMD(date: Date): string {
     return `${d}/${m}`;
 }
 
-// helper removed; no longer needed after switching to day-only navigation
 
 function isSameLocalDate(a: Date, b: Date): boolean {
     return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
@@ -182,6 +180,26 @@ export default function WeekStatusIndex() {
         submitUpdate(weekday, status, timeValue, location);
     }
 
+    function clearStatus(weekday: number) {
+        const key = getCellKey(canEditUserId, weekday);
+        if (locationDebounceRef.current[key]) {
+            clearTimeout(locationDebounceRef.current[key]);
+            delete locationDebounceRef.current[key];
+        }
+        setDraftLocations((prev) => {
+            const next = { ...prev };
+            delete next[key];
+            return next;
+        });
+        router.delete('/week-status', {
+            data: { iso_week: week, weekday },
+            preserveScroll: true,
+            preserveState: false,
+            onStart: () => setProcessing(true),
+            onFinish: () => setProcessing(false),
+        });
+    }
+
     return (
         <AppLayout breadcrumbs={breadcrumbs} >
 
@@ -225,7 +243,7 @@ export default function WeekStatusIndex() {
                                                 <div className="flex flex-col gap-0.5 mt-2 mb-2 text-center text-foreground">
                                                     <span>
                                                         {isToday ? (
-                                                            <Badge variant="default" className="px-2 text-md py-0.5 align-middle bg-blue-500 ">
+                                                            <Badge variant="default" className="px-2 text-sm font-medium py-0.5 align-middle bg-blue-600 text-white dark:bg-blue-500 dark:text-white">
                                                                 {d.label}
                                                             </Badge>
                                                         ) : (
@@ -263,11 +281,15 @@ export default function WeekStatusIndex() {
                                             const locationValue = (draftLocations[cellKey] ?? (current?.location ?? ''));
                                             return (
                                                 <TableCell key={d.value} className={`border-l align-middle p-2 w-[150px] min-w-[150px] ${d.value !== activeDayMobile ? 'hidden sm:table-cell' : ''}`}>
-                                                    <div className="flex flex-col gap-1.5 w-full">
+                                                <div className="flex flex-col gap-1.5 w-full">
                                                         <div className="flex items-center gap-2">
                                                             <span className={`text-[11px] text-muted-foreground inline-block text-right ${isSelf ? 'sm:w-11 w-12' : 'sm:w-11 w-12'}`}>{t('Lunch', 'Lunch')}:</span>
                                                             {isSelf ? (
                                                                 <Select onValueChange={(v) => {
+                                                                    if (v === '__clear__') {
+                                                                        clearStatus(d.value);
+                                                                        return;
+                                                                    }
                                                                     const newStatus = (v || null) as StatusValue;
                                                                     const nextTime = newStatus === 'Home' ? null : (timeValue || null);
                                                                     const nextLocation = newStatus === 'Home' ? null : (locationValue || null);
@@ -277,19 +299,25 @@ export default function WeekStatusIndex() {
                                                                         <SelectValue placeholder={t('Lunch', 'Lunch')} />
                                                                     </SelectTrigger>
                                                                     <SelectContent>
-                                                                        <SelectItem value="Lunchbox">
-                                                                            <Badge variant={getStatusBadgeVariant('Lunchbox')} className={`${getStatusBadgeClass('Lunchbox')} ${getBadgeSizeClass('Lunchbox')}`}>
+                                                                        <SelectItem value="Lunchbox" className="group w-full">
+                                                                            <Badge variant={getStatusBadgeVariant('Lunchbox')} className={`w-full justify-center ${getStatusBadgeClass('Lunchbox')} ${getBadgeSizeClass('Lunchbox')} tracking-tight`}>
                                                                                 {t('Lunchbox', 'Lunchbox')}
                                                                             </Badge>
                                                                         </SelectItem>
-                                                                        <SelectItem value="Buying">
-                                                                            <Badge variant={getStatusBadgeVariant('Buying')} className={`${getStatusBadgeClass('Buying')} ${getBadgeSizeClass('Buying')}`}>
+                                                                        <SelectItem value="Buying" className="group w-full">
+                                                                            <Badge variant={getStatusBadgeVariant('Buying')} className={`w-full justify-center ${getStatusBadgeClass('Buying')} ${getBadgeSizeClass('Buying')} tracking-tight`}>
                                                                                 {t('Buying', 'Buying')}
                                                                             </Badge>
                                                                         </SelectItem>
-                                                                        <SelectItem value="Home">
-                                                                            <Badge variant={getStatusBadgeVariant('Home')} className={`${getStatusBadgeClass('Home')} ${getBadgeSizeClass('Home')}`}>
+                                                                        <SelectItem value="Home" className="group w-full">
+                                                                            <Badge variant={getStatusBadgeVariant('Home')} className={`w-full justify-center ${getStatusBadgeClass('Home')} ${getBadgeSizeClass('Home')} tracking-tight`}>
                                                                                 {t('Home', 'Home')}
+                                                                            </Badge>
+                                                                        </SelectItem>
+                                                                        <div className="my-1 h-px w-full bg-muted" />
+                                                                        <SelectItem value="__clear__" disabled={!value && !timeValue && !locationValue} className="group w-full">
+                                                                            <Badge className="w-full justify-center text-sm font-medium bg-zinc-800 text-white border-transparent hover:bg-zinc-700 dark:bg-zinc-700 dark:hover:bg-zinc-600 tracking-tight">
+                                                                                {t('Clear', 'Clear')}
                                                                             </Badge>
                                                                         </SelectItem>
                                                                     </SelectContent>

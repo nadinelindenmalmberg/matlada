@@ -75,4 +75,22 @@ class WeekStatusController extends Controller
 
         return back();
     }
+
+    public function destroy(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'iso_week' => ['required', 'string', 'regex:/^\\d{4}-W\\d{2}$/'],
+            'weekday' => ['required', 'integer', 'between:1,5'],
+        ]);
+
+        $userId = (int) $request->user()->id;
+
+        UserDayStatus::query()
+            ->where('user_id', $userId)
+            ->where('iso_week', $request->string('iso_week')->toString())
+            ->where('weekday', (int) $request->integer('weekday'))
+            ->delete();
+
+        return back();
+    }
 }

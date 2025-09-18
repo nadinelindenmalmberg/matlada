@@ -23,6 +23,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::get('week-status', [WeekStatusController::class, 'index'])->name('week-status.index');
     Route::post('week-status', [WeekStatusController::class, 'upsert'])->name('week-status.upsert');
+    Route::delete('week-status', [WeekStatusController::class, 'destroy'])->name('week-status.destroy');
     Route::get('alignment', [AlignmentController::class, 'index'])->name('alignment.index');
 
     // Route::get('poll', [PollController::class, 'index'])->name('poll.index');
