@@ -62,15 +62,15 @@ function getStatusBadgeClass(status: StatusValue): string {
     // Tailwind utility colors with dark mode variants
     if (status === 'Lunchbox') {
         // Emerald (matched lightness) ensure max contrast
-        return 'bg-emerald-600 text-white border-transparent hover:bg-emerald-700 dark:bg-emerald-800 dark:hover:bg-emerald-400 dark:text-white';
+        return 'bg-emerald-600 text-white border-transparent hover:bg-emerald-700 group-hover:bg-emerald-700 dark:bg-emerald-800 dark:hover:bg-emerald-400 dark:group-hover:bg-emerald-400 dark:text-white';
     }
     if (status === 'Buying') {
         // Amber (matched lightness) with dark text for better contrast
-        return 'bg-amber-600 text-white border-transparent hover:bg-amber-700 dark:bg-amber-800 dark:hover:bg-amber-400 dark:text-white';
+        return 'bg-amber-600 text-white border-transparent hover:bg-amber-700 group-hover:bg-amber-700 dark:bg-amber-800 dark:hover:bg-amber-400 dark:group-hover:bg-amber-400 dark:text-white';
     }
     if (status === 'Home') {
         // Rose (matched lightness) ensure max contrast
-        return 'bg-rose-600 text-white border-transparent hover:bg-rose-700 dark:bg-rose-800 dark:hover:bg-rose-400 dark:text-white';
+        return 'bg-rose-600 text-white border-transparent hover:bg-rose-700 group-hover:bg-rose-700 dark:bg-rose-800 dark:hover:bg-rose-400 dark:group-hover:bg-rose-400 dark:text-white';
     }
     return '';
 }
@@ -259,7 +259,7 @@ export default function WeekStatusIndex() {
                             </TableHeader>
                             <TableBody>
                                 {users.map((u) => (
-                                    <TableRow key={u.id}>
+                                    <TableRow key={u.id} className="group">
                                         <TableCell className="whitespace-nowrap align-middle p-2 w-[150px] min-w-[150px]">
                                             <div className="flex items-center gap-2">
                                                 <Avatar className="h-8 w-8 overflow-hidden rounded-full">
@@ -378,6 +378,7 @@ export default function WeekStatusIndex() {
                                                                             role="combobox"
                                                                             aria-expanded={!!openCombos[cellKey]}
                                                                             aria-controls={`location-combobox-${cellKey}`}
+                                                                            list="default-locations"
                                                                             placeholder={t('Where you will be at that time', 'Where you will be at that time')}
                                                                             aria-label={t('Location where you will be at that time', 'Location where you will be at that time')}
                                                                             value={locationValue}
