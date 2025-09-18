@@ -97,6 +97,16 @@
     "Save": "Save",
     "Lunch Poll": "Lunch Poll",
     "Made by Filip Sjölander": "Made by Filip Sjölander",
-    "Hint: Right click your cell for more actions": "Hint: Right click one of your days for more actions"
+    "Hint: Right click your cell for more actions": "Hint: Right click one of your days for more actions",
+    "at time": "around ",
+    "at location": "at ",
+    "sometime": "sometime",
+    "at school": "at school",
+    "I'll arrive ": "I'll arrive ",
+    "No plans yet": "No plans yet",
+    "Warning: This will override existing values for": "Warning: This will override existing values for",
+    "This will set the same values for all coming days in this week.": "This will set the same values for all coming days in this week.",
+    "Cancel": "Cancel",
+    "Confirm": "Confirm"
 
 }

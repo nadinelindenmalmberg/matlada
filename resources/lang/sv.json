@@ -109,5 +109,16 @@
     "Made by Filip Sjölander": "Skapad av Filip Sjölander",
     "Hint: Right click your cell for more actions": "Tips: Högerklicka på en av dina dagar för fler åtgärder",
     "Paste": "Klistra in",
-    "Copy": "Kopiera"
+    "Copy": "Kopiera",
+    "I'll stay home": "Jag stannar hemma",
+    "at time": "runt ",
+    "at location": "till ",
+    "sometime": "någon gång",
+    "at school": "i skolan",
+    "I'll arrive ": "Jag kommer ",
+    "No plans yet": "Inga planer än",
+    "Warning: This will override existing values for": "Varning: Detta kommer att skriva över befintliga värden för",
+    "This will set the same values for all coming days in this week.": "Detta kommer att sätta samma värden för alla kommande dagar denna vecka.",
+    "Cancel": "Avbryt",
+    "Confirm": "Bekräfta"
 }
