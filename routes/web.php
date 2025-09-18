@@ -29,8 +29,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Route::post('poll/vote', [PollController::class, 'vote'])->name('poll.vote');
 });
 
-require __DIR__ . '/settings.php';
-require __DIR__ . '/auth.php';
+require __DIR__.'/settings.php';
+require __DIR__.'/auth.php';
 
 Route::post('/locale', function (Request $request): RedirectResponse {
     $locale = $request->string('locale')->toString();

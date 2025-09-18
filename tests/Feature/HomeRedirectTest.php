@@ -16,5 +16,5 @@ it('shows welcome page for unauthenticated users', function () {
     $response = $this->get('/');
 
     $response->assertOk();
-    $response->assertInertia(fn($page) => $page->component('welcome'));
+    $response->assertInertia(fn ($page) => $page->component('welcome'));
 });
