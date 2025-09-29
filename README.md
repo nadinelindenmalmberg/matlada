@@ -1,0 +1,3 @@
+- [ ] Streaks
+- [ ] Fler statusar
+- [ ] Leaderboard
