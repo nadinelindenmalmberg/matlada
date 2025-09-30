@@ -39,7 +39,7 @@ export default function PollIndex({ poll, userVote, isVotingOpen, timeUntilDeadl
     const { post, processing } = useForm()
 
     const handleVote = (optionId: number) => {
-        post(route('poll.vote').url, {
+        post(pollVote().url, {
             poll_option_id: optionId,
         })
     }

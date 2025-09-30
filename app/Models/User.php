@@ -82,13 +82,13 @@ class User extends Authenticatable
 
         // Use S3 disk for avatars if configured, otherwise fall back to public disk
         $disk = config('filesystems.default') === 's3' ? 's3' : 'public';
-        
+
         // For S3, generate signed URLs for security
         if ($disk === 's3') {
-            $expiration = now()->addHours(config('filesystems.s3_signed_url_expiration', 24));
+            $expiration = now()->addHours((int) config('filesystems.s3_signed_url_expiration', 24));
             return Storage::disk('s3')->temporaryUrl($avatar, $expiration);
         }
-        
+
         return Storage::disk($disk)->url($avatar);
     }
 
@@ -104,16 +104,16 @@ class User extends Authenticatable
 
         $disk = config('filesystems.default') === 's3' ? 's3' : 'public';
         $filename = 'avatars/' . $this->id . '_' . time() . '.' . $file->getClientOriginalExtension();
-        
-        // For S3, explicitly set visibility to private for signed URLs
+
         if ($disk === 's3') {
-            Storage::disk('s3')->put($filename, file_get_contents($file), 'private');
+            // Store privately and persist the object key in the avatar column
+            Storage::disk('s3')->put($filename, file_get_contents($file), ['visibility' => 'private']);
+            $this->update(['avatar' => $filename]);
         } else {
             Storage::disk($disk)->put($filename, file_get_contents($file));
+            $this->update(['avatar' => $filename]);
         }
-        
-        $this->update(['avatar' => $filename]);
-        
+
         return $filename;
     }
 
@@ -126,14 +126,30 @@ class User extends Authenticatable
             return true;
         }
 
-        $disk = config('filesystems.default') === 's3' ? 's3' : 'public';
-        
-        if (Storage::disk($disk)->exists($this->avatar)) {
-            Storage::disk($disk)->delete($this->avatar);
+        $diskName = config('filesystems.default') === 's3' ? 's3' : 'public';
+        $disk = Storage::disk($diskName);
+
+        if ($diskName === 's3') {
+            // S3 delete is idempotent; avoid exists() which may fail due to permissions/policy
+            try {
+                $path = $this->avatar;
+                // If an absolute URL is stored, derive the key from the URL path
+                if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+                    $parsed = parse_url($path);
+                    $path = isset($parsed['path']) ? ltrim($parsed['path'], '/') : $path;
+                }
+                $disk->delete($path);
+            } catch (\Throwable $e) {
+                // Ignore missing object or permission-related existence checks
+            }
+        } else {
+            if ($disk->exists($this->avatar)) {
+                $disk->delete($this->avatar);
+            }
         }
 
         $this->update(['avatar' => null]);
-        
+
         return true;
     }
 }
