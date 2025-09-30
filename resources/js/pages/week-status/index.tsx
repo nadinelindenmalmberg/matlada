@@ -42,7 +42,7 @@ type PageProps = {
     canEditUserId: number;
 };
 
-type UserWithAvatar = PageProps['users'][number] & { avatar?: string };
+type UserWithAvatar = PageProps['users'][number] & { avatar?: string; avatar_url?: string };
 
 function useWeekdaysLabels(t: (key: string, fallback?: string) => string) {
     return [
@@ -401,7 +401,7 @@ export default function WeekStatusIndex() {
                                         <TableCell className="whitespace-nowrap align-middle p-2 w-[200px] min-w-[200px]">
                                             <div className="flex items-center gap-2">
                                                 <Avatar className="h-8 w-8 overflow-hidden rounded-full">
-                                                    <AvatarImage src={(u as UserWithAvatar).avatar ? (((u as UserWithAvatar).avatar as string).startsWith('http') ? (u as UserWithAvatar).avatar : `/storage/${(u as UserWithAvatar).avatar}`) : undefined} alt={u.name} />
+                                                    <AvatarImage src={(u as UserWithAvatar).avatar_url} alt={u.name} />
                                                     <AvatarFallback className="rounded-full bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
                                                         {getInitials(u.name)}
                                                     </AvatarFallback>
