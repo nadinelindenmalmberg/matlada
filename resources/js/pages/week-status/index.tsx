@@ -460,7 +460,7 @@ export default function WeekStatusIndex() {
                                                                         </div>
                                                                     ) : (
                                                                         value ? (
-                                                                            <Badge variant={getStatusBadgeVariant(value)} className={`${getStatusBadgeClass(value)} ${getBadgeSizeClass(value)}`}>{
+                                                                            <Badge variant={getStatusBadgeVariant(value)} className={`${getStatusBadgeClass(value)} ${getBadgeSizeClass()}`}>{
                                                                                 value === 'Lunchbox' ? t('Lunchbox', 'Lunchbox') : value === 'Buying' ? t('Buying', 'Buying') : t('Home', 'Home')
                                                                             }</Badge>
                                                                         ) : (
@@ -710,7 +710,7 @@ export default function WeekStatusIndex() {
                                                             <div className="flex-1 flex flex-col gap-1.5 group-hover:flex-[0_0_calc(100%-2.5rem)]">
                                                                 <div className="space-y-2">
                                                                     {value && (
-                                                                        <Badge variant={getStatusBadgeVariant(value)} className={`${getStatusBadgeClass(value)} ${getBadgeSizeClass(value)} font-semibold w-full justify-start`}>
+                                                                        <Badge variant={getStatusBadgeVariant(value)} className={`${getStatusBadgeClass(value)} ${getBadgeSizeClass()} font-semibold w-full justify-start`}>
                                                                             {value === 'Lunchbox' ? t('Lunchbox', 'Lunchbox') : value === 'Buying' ? t('Buying', 'Buying') : t('Home', 'Home')}
                                                                         </Badge>
                                                                     )}
