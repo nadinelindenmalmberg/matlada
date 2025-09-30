@@ -80,7 +80,60 @@ class User extends Authenticatable
             return $avatar;
         }
 
-        // Use the configured public disk URL to generate a correct absolute URL
-        return Storage::disk('public')->url($avatar);
+        // Use S3 disk for avatars if configured, otherwise fall back to public disk
+        $disk = config('filesystems.default') === 's3' ? 's3' : 'public';
+        
+        // For S3, generate signed URLs for security
+        if ($disk === 's3') {
+            $expiration = now()->addHours(config('filesystems.s3_signed_url_expiration', 24));
+            return Storage::disk('s3')->temporaryUrl($avatar, $expiration);
+        }
+        
+        return Storage::disk($disk)->url($avatar);
+    }
+
+    /**
+     * Upload and store a new avatar for the user.
+     */
+    public function uploadAvatar($file): string
+    {
+        // Delete old avatar if exists
+        if ($this->avatar) {
+            $this->deleteAvatar();
+        }
+
+        $disk = config('filesystems.default') === 's3' ? 's3' : 'public';
+        $filename = 'avatars/' . $this->id . '_' . time() . '.' . $file->getClientOriginalExtension();
+        
+        // For S3, explicitly set visibility to private for signed URLs
+        if ($disk === 's3') {
+            Storage::disk('s3')->put($filename, file_get_contents($file), 'private');
+        } else {
+            Storage::disk($disk)->put($filename, file_get_contents($file));
+        }
+        
+        $this->update(['avatar' => $filename]);
+        
+        return $filename;
+    }
+
+    /**
+     * Delete the user's current avatar.
+     */
+    public function deleteAvatar(): bool
+    {
+        if (!$this->avatar) {
+            return true;
+        }
+
+        $disk = config('filesystems.default') === 's3' ? 's3' : 'public';
+        
+        if (Storage::disk($disk)->exists($this->avatar)) {
+            Storage::disk($disk)->delete($this->avatar);
+        }
+
+        $this->update(['avatar' => null]);
+        
+        return true;
     }
 }

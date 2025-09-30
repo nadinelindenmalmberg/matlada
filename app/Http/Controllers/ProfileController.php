@@ -1,46 +1,38 @@
 <?php
 
-namespace App\Http\Controllers\Settings;
+namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\Settings\ProfileUpdateRequest;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 use Inertia\Response;
 
 class ProfileController extends Controller
 {
     /**
-     * Show the user's profile settings page.
+     * Display the user's profile form.
      */
     public function edit(Request $request): Response
     {
-        return Inertia::render('settings/profile', [
-            'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
-            'status' => $request->session()->get('status'),
+        return Inertia::render('Profile/Edit', [
+            'mustVerifyEmail' => $request->user() instanceof \Illuminate\Contracts\Auth\MustVerifyEmail,
+            'status' => session('status'),
         ]);
     }
 
     /**
-     * Update the user's profile settings.
+     * Update the user's profile information.
      */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
+    public function update(Request $request): RedirectResponse
     {
-        $data = $request->validated();
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|lowercase|email|max:255|unique:users,email,' . $request->user()->id,
+        ]);
 
-        // Handle avatar upload if provided
-        if ($request->hasFile('avatar')) {
-            $user = $request->user();
-            $user->uploadAvatar($request->file('avatar'));
-            // Remove avatar from the data array since it's handled by the User model
-            unset($data['avatar']);
-        }
-
-        $request->user()->fill($data);
+        $request->user()->fill($request->validated());
 
         if ($request->user()->isDirty('email')) {
             $request->user()->email_verified_at = null;
@@ -48,7 +40,7 @@ class ProfileController extends Controller
 
         $request->user()->save();
 
-        return to_route('profile.edit');
+        return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
 
     /**
@@ -63,7 +55,7 @@ class ProfileController extends Controller
         $user = Auth::user();
         $user->uploadAvatar($request->file('avatar'));
 
-        return back()->with('status', 'avatar-updated');
+        return Redirect::back()->with('status', 'avatar-updated');
     }
 
     /**
@@ -74,7 +66,7 @@ class ProfileController extends Controller
         $user = Auth::user();
         $user->deleteAvatar();
 
-        return back()->with('status', 'avatar-deleted');
+        return Redirect::back()->with('status', 'avatar-deleted');
     }
 
     /**
@@ -88,6 +80,9 @@ class ProfileController extends Controller
 
         $user = $request->user();
 
+        // Delete avatar before deleting user
+        $user->deleteAvatar();
+
         Auth::logout();
 
         $user->delete();
@@ -95,6 +90,6 @@ class ProfileController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        return Redirect::to('/');
     }
 }

@@ -17,6 +17,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | S3 Signed URL Expiration
+    |--------------------------------------------------------------------------
+    |
+    | This value controls how long S3 signed URLs remain valid (in hours).
+    | Shorter expiration times provide better security at the cost of more
+    | frequent URL regeneration. Default is 24 hours.
+    |
+    */
+
+    's3_signed_url_expiration' => env('S3_SIGNED_URL_EXPIRATION', 24),
+
+    /*
+    |--------------------------------------------------------------------------
     | Filesystem Disks
     |--------------------------------------------------------------------------
     |
@@ -56,6 +69,7 @@ return [
             'url' => env('AWS_URL'),
             'endpoint' => env('AWS_ENDPOINT'),
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
+            'visibility' => 'private',
             'throw' => false,
             'report' => false,
         ],
