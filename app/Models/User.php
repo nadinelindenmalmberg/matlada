@@ -120,8 +120,7 @@ class User extends Authenticatable
             $this->deleteAvatar();
         }
 
-        $defaultDisk = config('filesystems.default', 'local');
-        $disk = $defaultDisk === 's3' ? 's3' : 'public';
+        $disk = 's3';
         $key = $this->id . '_' . time() . '.' . $file->getClientOriginalExtension();
 
         if ($disk === 's3') {
@@ -162,17 +161,6 @@ class User extends Authenticatable
             }
 
             $this->update(['avatar' => $storedPath]);
-        } else {
-            $storedPath = Storage::disk($disk)->putFileAs('avatars', $file, $key, ['visibility' => 'public']);
-            if ($storedPath === false) {
-                logger()->error('Public disk putFileAs failed for avatar upload', [
-                    'user_id' => $this->id,
-                    'disk' => $disk,
-                    'key' => $key,
-                ]);
-                throw new \RuntimeException('Failed to upload avatar to public disk');
-            }
-            $this->update(['avatar' => $storedPath]);
         }
 
         return $storedPath;
@@ -187,8 +175,8 @@ class User extends Authenticatable
             return true;
         }
 
-        $diskName = config('filesystems.default') === 's3' ? 's3' : 'public';
-        $disk = Storage::disk($diskName);
+        $diskName = 's3';
+        $disk = Storage::disk('s3');
 
         if ($diskName === 's3') {
             // S3 delete is idempotent; avoid exists() which may fail due to permissions/policy
@@ -202,10 +190,6 @@ class User extends Authenticatable
                 $disk->delete($path);
             } catch (\Throwable $e) {
                 // Ignore missing object or permission-related existence checks
-            }
-        } else {
-            if ($disk->exists($this->avatar)) {
-                $disk->delete($this->avatar);
             }
         }
 
