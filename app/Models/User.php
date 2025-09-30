@@ -86,7 +86,25 @@ class User extends Authenticatable
         // For S3, generate signed URLs for security
         if ($disk === 's3') {
             $expiration = now()->addHours((int) config('filesystems.s3_signed_url_expiration', 24));
-            return Storage::disk('s3')->temporaryUrl($avatar, $expiration);
+
+            // Ensure browsers recognize the response as an image to avoid OpaqueResponseBlocking
+            $extension = strtolower(pathinfo($avatar, PATHINFO_EXTENSION));
+            $extensionToMime = [
+                'jpg' => 'image/jpeg',
+                'jpeg' => 'image/jpeg',
+                'png' => 'image/png',
+                'gif' => 'image/gif',
+                'webp' => 'image/webp',
+                'bmp' => 'image/bmp',
+                'svg' => 'image/svg+xml',
+            ];
+            $mime = $extensionToMime[$extension] ?? 'application/octet-stream';
+
+            return Storage::disk('s3')->temporaryUrl($avatar, $expiration, [
+                'ResponseContentType' => $mime,
+                'ResponseContentDisposition' => 'inline; filename="' . basename($avatar) . '"',
+                'ResponseCacheControl' => 'public, max-age=31536000, immutable',
+            ]);
         }
 
         return Storage::disk($disk)->url($avatar);
@@ -102,19 +120,62 @@ class User extends Authenticatable
             $this->deleteAvatar();
         }
 
-        $disk = config('filesystems.default') === 's3' ? 's3' : 'public';
-        $filename = 'avatars/' . $this->id . '_' . time() . '.' . $file->getClientOriginalExtension();
+        $defaultDisk = config('filesystems.default', 'local');
+        $disk = $defaultDisk === 's3' ? 's3' : 'public';
+        $key = $this->id . '_' . time() . '.' . $file->getClientOriginalExtension();
 
         if ($disk === 's3') {
-            // Store privately and persist the object key in the avatar column
-            Storage::disk('s3')->put($filename, file_get_contents($file), ['visibility' => 'private']);
-            $this->update(['avatar' => $filename]);
+            try {
+                // Build a one-off S3 disk that disables SSL verification (local-only fix)
+                $s3Config = config('filesystems.disks.s3');
+                $s3Config['throw'] = true;
+                // Guzzle client option
+                $s3Config['http'] = ['verify' => false];
+
+                $s3Disk = \Illuminate\Support\Facades\Storage::build($s3Config);
+
+                $storedPath = $s3Disk->putFileAs(
+                    'avatars',
+                    $file,
+                    $key,
+                    [
+                        'visibility' => 'private',
+                        'ContentType' => $file->getMimeType(),
+                        'CacheControl' => 'public, max-age=31536000, immutable',
+                    ]
+                );
+
+                if ($storedPath === false) {
+                    logger()->error('S3 putFileAs failed for avatar upload', [
+                        'user_id' => $this->id,
+                        'key' => $key,
+                    ]);
+                    throw new \RuntimeException('Failed to upload avatar to S3');
+                }
+            } catch (\Throwable $e) {
+                logger()->error('S3 avatar upload exception', [
+                    'user_id' => $this->id,
+                    'key' => $key,
+                    'message' => $e->getMessage(),
+                ]);
+                throw $e;
+            }
+
+            $this->update(['avatar' => $storedPath]);
         } else {
-            Storage::disk($disk)->put($filename, file_get_contents($file));
-            $this->update(['avatar' => $filename]);
+            $storedPath = Storage::disk($disk)->putFileAs('avatars', $file, $key, ['visibility' => 'public']);
+            if ($storedPath === false) {
+                logger()->error('Public disk putFileAs failed for avatar upload', [
+                    'user_id' => $this->id,
+                    'disk' => $disk,
+                    'key' => $key,
+                ]);
+                throw new \RuntimeException('Failed to upload avatar to public disk');
+            }
+            $this->update(['avatar' => $storedPath]);
         }
 
-        return $filename;
+        return $storedPath;
     }
 
     /**
