@@ -87,6 +87,8 @@ function getStatusBadgeClass(status: StatusValue): string {
     return '';
 }
 
+// Removed dot indicator; using badges in dropdown items instead.
+
 function getBadgeSizeClass(): string {
     // Match the height of the SelectTrigger (h-8)
     return 'h-8 text-sm px-2 whitespace-nowrap flex items-center';
@@ -348,24 +350,26 @@ export default function WeekStatusIndex() {
                 </div>
                 {/* Mobile day navigation */}
                 <div className="sm:hidden mb-3 flex items-center justify-between">
-                    <button
+                    <Button
                         type="button"
-                        className="px-3 py-1.5 text-sm rounded-md border"
+                        variant="outline"
+                        className="px-3 py-1.5 text-sm rounded-md"
                         onClick={() => {
                             setActiveDayMobile((d) => (d === 1 ? 5 : d - 1));
                         }}
                     >
                         {t('Previous day', 'Previous day')}
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                         type="button"
-                        className="px-3 py-1.5 text-sm rounded-md border"
+                        variant="outline"
+                        className="px-3 py-1.5 text-sm rounded-md"
                         onClick={() => {
                             setActiveDayMobile((d) => (d === 5 ? 1 : d + 1));
                         }}
                     >
                         {t('Next day', 'Next day')}
-                    </button>
+                    </Button>
                 </div>
                 <div className="overflow-x-auto">
                     <div className="rounded-md border">
@@ -417,173 +421,184 @@ export default function WeekStatusIndex() {
                                             const cellKey = getCellKey(u.id, d.value);
                                             const locationValue = (draftLocations[cellKey] ?? (current?.location ?? ''));
                                             return (
-                                                <TableCell key={d.value} className={`group border-l align-middle p-2 w-[200px] min-w-[200px] ${d.value !== activeDayMobile ? 'hidden sm:table-cell' : ''}`}>
+                                                <TableCell key={d.value} className={`group border-l align-top p-2 w-[200px] min-w-[200px] ${d.value !== activeDayMobile ? 'hidden sm:table-cell' : ''}`}>
                                                     {isSelf ? (
-                                                        <div className="relative flex gap-1.5 w-full group">
+                                                        <div className="relative flex gap-1.5 w-full group items-start">
                                                             {/* Main content area */}
-                                                            <div className="flex-1 flex flex-col gap-1.5 group-hover:flex-[0_0_calc(100%-2.5rem)]">
-                                                                <div className="flex items-center gap-2">
-                                                                    {isSelf ? (
-                                                                        <div className="flex-1 min-w-0 w-full">
-                                                                            <Select onValueChange={(v) => {
-                                                                                if (v === '__clear__') {
-                                                                                    clearStatus(d.value);
-                                                                                    return;
-                                                                                }
-                                                                                const newStatus = (v || null) as StatusValue;
-                                                                                const nextTime = newStatus === 'Home' ? null : (timeValue || null);
-                                                                                const nextLocation = newStatus === 'Home' ? null : (locationValue || null);
-                                                                                submitUpdate(d.value, newStatus, nextTime, nextLocation);
-                                                                            }} value={value ?? undefined as unknown as string}>
-                                                                                <SelectTrigger className={`h-8 px-2 w-full [&>svg]:text-current [&>svg]:opacity-90 font-medium ${value ? getStatusBadgeClass(value) : ''}`}>
-                                                                                    <SelectValue placeholder={t('Lunch', 'Lunch')} />
-                                                                                </SelectTrigger>
-                                                                                <SelectContent>
-                                                                                    <SelectItem value="Lunchbox" className="group w-full">
-                                                                                        <Badge variant={getStatusBadgeVariant('Lunchbox')} className={`w-full justify-center ${getStatusBadgeClass('Lunchbox')} ${getBadgeSizeClass()} tracking-tight`}>
-                                                                                            {t('Lunchbox', 'Lunchbox')}
-                                                                                        </Badge>
-                                                                                    </SelectItem>
-                                                                                    <SelectItem value="Buying" className="group w-full">
-                                                                                        <Badge variant={getStatusBadgeVariant('Buying')} className={`w-full justify-center ${getStatusBadgeClass('Buying')} ${getBadgeSizeClass()} tracking-tight`}>
-                                                                                            {t('Buying', 'Buying')}
-                                                                                        </Badge>
-                                                                                    </SelectItem>
-                                                                                    <SelectItem value="Home" className="group w-full">
-                                                                                        <Badge variant={getStatusBadgeVariant('Home')} className={`w-full justify-center ${getStatusBadgeClass('Home')} ${getBadgeSizeClass()} tracking-tight`}>
-                                                                                            {t('Home', 'Home')}
-                                                                                        </Badge>
-                                                                                    </SelectItem>
-                                                                                    {/* Clear moved next to Copy/Paste/Set all */}
-                                                                                </SelectContent>
-                                                                            </Select>
-                                                                        </div>
-                                                                    ) : (
-                                                                        value ? (
-                                                                            <Badge variant={getStatusBadgeVariant(value)} className={`${getStatusBadgeClass(value)} ${getBadgeSizeClass()}`}>{
-                                                                                value === 'Lunchbox' ? t('Lunchbox', 'Lunchbox') : value === 'Buying' ? t('Buying', 'Buying') : t('Home', 'Home')
-                                                                            }</Badge>
-                                                                        ) : (
-
-                                                                            <span className="text-xs text-muted-foreground">—</span>
-                                                                        )
-                                                                    )}
-                                                                </div>
-                                                                <div className="flex items-center gap-2">
-                                                                    {value !== 'Home' ? (
-                                                                        isSelf ? (
+                                                            <div className="flex-1 flex flex-col gap-1.5">
+                                                                <div className="w-full transition-all duration-150 group-hover:w-[calc(100%-2.5rem)]">
+                                                                    <div className="flex items-center gap-2">
+                                                                        {isSelf ? (
                                                                             <div className="flex-1 min-w-0 w-full">
-                                                                                <Input
-                                                                                    type="time"
-                                                                                    step="60"
-                                                                                    aria-label={t('Arrival time to school', 'Arrival time to school')}
-                                                                                    title={t('Arrival time to school', 'Arrival time to school')}
-                                                                                    className={`h-8 w-full bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none font-medium ${!timeValue ? 'text-muted-foreground' : 'text-foreground'}`}
-                                                                                    value={timeValue || ''}
-                                                                                    onChange={(e) => submitUpdate(d.value, value, e.target.value || null, locationValue || null)}
-                                                                                />
+                                                                                <Select onValueChange={(v) => {
+                                                                                    if (v === '__clear__') {
+                                                                                        clearStatus(d.value);
+                                                                                        return;
+                                                                                    }
+                                                                                    const newStatus = (v || null) as StatusValue;
+                                                                                    const nextTime = newStatus === 'Home' ? null : (timeValue || null);
+                                                                                    const nextLocation = newStatus === 'Home' ? null : (locationValue || null);
+                                                                                    submitUpdate(d.value, newStatus, nextTime, nextLocation);
+                                                                                }} value={value ?? undefined as unknown as string}>
+                                                                                    <SelectTrigger className={`h-8 px-2 w-full font-medium justify-start text-left whitespace-nowrap flex items-center text-sm ${value ? getStatusBadgeClass(value) : ''}`}>
+                                                                                        <SelectValue placeholder={t('Lunch', 'Lunch')} />
+                                                                                    </SelectTrigger>
+                                                                                    <SelectContent>
+                                                                                        <SelectItem value="Lunchbox" className={`group w-full`}>
+                                                                                            <Badge
+                                                                                                variant={getStatusBadgeVariant('Lunchbox')}
+                                                                                                className={`w-full justify-start ${getStatusBadgeClass('Lunchbox')} ${getBadgeSizeClass()}`}
+                                                                                            >
+                                                                                                {t('Lunchbox', 'Lunchbox')}
+                                                                                            </Badge>
+                                                                                        </SelectItem>
+                                                                                        <SelectItem value="Buying" className={`group w-full`}>
+                                                                                            <Badge
+                                                                                                variant={getStatusBadgeVariant('Buying')}
+                                                                                                className={`w-full justify-start ${getStatusBadgeClass('Buying')} ${getBadgeSizeClass()}`}
+                                                                                            >
+                                                                                                {t('Buying', 'Buying')}
+                                                                                            </Badge>
+                                                                                        </SelectItem>
+                                                                                        <SelectItem value="Home" className={`group w-full`}>
+                                                                                            <Badge
+                                                                                                variant={getStatusBadgeVariant('Home')}
+                                                                                                className={`w-full justify-start ${getStatusBadgeClass('Home')} ${getBadgeSizeClass()}`}
+                                                                                            >
+                                                                                                {t('Home', 'Home')}
+                                                                                            </Badge>
+                                                                                        </SelectItem>
+                                                                                        {/* Clear moved next to Copy/Paste/Set all */}
+                                                                                    </SelectContent>
+                                                                                </Select>
                                                                             </div>
                                                                         ) : (
-                                                                            <span className={timeValue ? "text-xs" : "text-xs text-muted-foreground"}>{timeValue || '—'}</span>
-                                                                        )
-                                                                    ) : (
-                                                                        isSelf ? (
-                                                                            <div className="flex-1 min-w-0 w-full">
-                                                                                <Input
-                                                                                    type="time"
-                                                                                    step="60"
-                                                                                    aria-label={t('Arrival time not needed', 'Arrival time not needed')}
-                                                                                    title={t('Arrival time not needed', 'Arrival time not needed')}
-                                                                                    className="h-8 w-full bg-muted text-muted-foreground"
-                                                                                    value={''}
-                                                                                    disabled
-                                                                                    readOnly
-                                                                                />
-                                                                            </div>
-                                                                        ) : (
-                                                                            <span className="text-xs text-muted-foreground">—</span>
-                                                                        )
-                                                                    )}
-                                                                </div>
-                                                                <div className="flex items-center gap-2">
-                                                                    {value !== 'Home' ? (
-                                                                        isSelf ? (
-                                                                            <div className="relative flex-1 min-w-0 sm:min-w-[100px]">
-                                                                                <input
-                                                                                    type="text"
-                                                                                    className="h-8 w-full rounded-md border bg-background px-2 text-sm font-medium"
-                                                                                    role="combobox"
-                                                                                    aria-expanded={!!openCombos[cellKey]}
-                                                                                    aria-controls={`location-combobox-${cellKey}`}
-                                                                                    list="default-locations"
-                                                                                    placeholder={t('Where you will be at that time', 'Where you will be at that time')}
-                                                                                    aria-label={t('Location where you will be at that time', 'Location where you will be at that time')}
-                                                                                    value={locationValue}
-                                                                                    onChange={(e) => {
-                                                                                        const v = e.target.value;
-                                                                                        setDraftLocations((prev) => ({ ...prev, [cellKey]: v }));
-                                                                                        setOpenCombos((prev) => ({ ...prev, [cellKey]: true }));
-                                                                                        scheduleLocationSubmit(u.id, d.value, value, timeValue || null, v || null);
-                                                                                    }}
-                                                                                    onFocus={() => setOpenCombos((prev) => ({ ...prev, [cellKey]: true }))}
-                                                                                    onBlur={() => {
-                                                                                        setTimeout(() => setOpenCombos((prev) => ({ ...prev, [cellKey]: false })), 150);
-                                                                                        if (!skipBlurSubmitRef.current[cellKey]) {
-                                                                                            scheduleLocationSubmit(u.id, d.value, value, timeValue || null, (locationValue || null));
-                                                                                        }
-                                                                                        if (skipBlurSubmitRef.current[cellKey]) {
-                                                                                            delete skipBlurSubmitRef.current[cellKey];
-                                                                                        }
-                                                                                    }}
+                                                                            value ? (
+                                                                                <Badge variant={getStatusBadgeVariant(value)} className={`${getStatusBadgeClass(value)} ${getBadgeSizeClass()}`}>{
+                                                                                    value === 'Lunchbox' ? t('Lunchbox', 'Lunchbox') : value === 'Buying' ? t('Buying', 'Buying') : t('Home', 'Home')
+                                                                                }</Badge>
+                                                                            ) : (
 
-                                                                                />
-                                                                                {openCombos[cellKey] && (
-                                                                                    <div id={`location-combobox-${cellKey}`} className="absolute z-10 mt-1 left-0 right-0 rounded-md border bg-popover shadow-md">
-                                                                                        {defaultLocations
-                                                                                            .filter((loc) => loc.toLowerCase().includes((locationValue || '').toLowerCase()))
-                                                                                            .map((loc) => (
-                                                                                                <button
-                                                                                                    type="button"
-                                                                                                    key={loc}
-                                                                                                    className="w-full px-2 py-1.5 text-left text-sm hover:bg-accent"
-                                                                                                    onMouseDown={(e) => {
-                                                                                                        e.preventDefault();
-                                                                                                        skipBlurSubmitRef.current[cellKey] = true;
-                                                                                                    }}
-                                                                                                    onClick={() => {
-                                                                                                        setDraftLocations((prev) => ({ ...prev, [cellKey]: loc }));
-                                                                                                        setOpenCombos((prev) => ({ ...prev, [cellKey]: false }));
-                                                                                                        submitLocationImmediately(u.id, d.value, value, timeValue || null, loc);
-                                                                                                    }}
-                                                                                                >
-                                                                                                    {loc}
-                                                                                                </button>
-                                                                                            ))}
-                                                                                        {defaultLocations.filter((loc) => loc.toLowerCase().includes((locationValue || '').toLowerCase())).length === 0 && (
-                                                                                            <div className="px-2 py-1.5 text-sm text-muted-foreground">{t('No matches', 'No matches')}</div>
-                                                                                        )}
-                                                                                    </div>
-                                                                                )}
-                                                                            </div>
+                                                                                <span className="text-xs text-muted-foreground">—</span>
+                                                                            )
+                                                                        )}
+                                                                    </div>
+                                                                    <div className="flex items-center gap-2 mt-1">
+                                                                        {value !== 'Home' ? (
+                                                                            isSelf ? (
+                                                                                <div className="flex-1 min-w-0 w-full">
+                                                                                    <Input
+                                                                                        type="time"
+                                                                                        step="60"
+                                                                                        aria-label={t('Arrival time to school', 'Arrival time to school')}
+                                                                                        title={t('Arrival time to school', 'Arrival time to school')}
+                                                                                        className={`h-8 w-full bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none font-medium ${!timeValue ? 'text-muted-foreground' : 'text-foreground'}`}
+                                                                                        value={timeValue || ''}
+                                                                                        onChange={(e) => submitUpdate(d.value, value, e.target.value || null, locationValue || null)}
+                                                                                    />
+                                                                                </div>
+                                                                            ) : (
+                                                                                <span className={timeValue ? "text-xs" : "text-xs text-muted-foreground"}>{timeValue || '—'}</span>
+                                                                            )
                                                                         ) : (
-                                                                            <span className={locationValue ? "text-xs" : "text-xs text-muted-foreground"}>{locationValue || '—'}</span>
-                                                                        )
-                                                                    ) : (
-                                                                        isSelf ? (
-                                                                            <div className="relative flex-1 min-w-0 sm:min-w-[100px]">
-                                                                                <input
-                                                                                    type="text"
-                                                                                    className="h-8 w-full rounded-md border bg-muted px-2 text-sm text-muted-foreground"
-                                                                                    placeholder={t('Not needed', 'Not needed')}
-                                                                                    value=""
-                                                                                    disabled
-                                                                                    readOnly
-                                                                                />
-                                                                            </div>
+                                                                            isSelf ? (
+                                                                                <div className="flex-1 min-w-0 w-full">
+                                                                                    <Input
+                                                                                        type="time"
+                                                                                        step="60"
+                                                                                        aria-label={t('Arrival time not needed', 'Arrival time not needed')}
+                                                                                        title={t('Arrival time not needed', 'Arrival time not needed')}
+                                                                                        className="h-8 w-full bg-muted text-muted-foreground"
+                                                                                        value={''}
+                                                                                        disabled
+                                                                                        readOnly
+                                                                                    />
+                                                                                </div>
+                                                                            ) : (
+                                                                                <span className="text-xs text-muted-foreground">—</span>
+                                                                            )
+                                                                        )}
+                                                                    </div>
+                                                                    <div className="flex items-center gap-2 mt-1">
+                                                                        {value !== 'Home' ? (
+                                                                            isSelf ? (
+                                                                                <div className="relative flex-1 min-w-0 sm:min-w-[100px]">
+                                                                                    <input
+                                                                                        type="text"
+                                                                                        className="h-8 w-full rounded-md border bg-background px-2 text-sm font-medium"
+                                                                                        role="combobox"
+                                                                                        aria-expanded={!!openCombos[cellKey]}
+                                                                                        aria-controls={`location-combobox-${cellKey}`}
+                                                                                        list="default-locations"
+                                                                                        placeholder={t('Where you will be at that time', 'Where you will be at that time')}
+                                                                                        aria-label={t('Location where you will be at that time', 'Location where you will be at that time')}
+                                                                                        value={locationValue}
+                                                                                        onChange={(e) => {
+                                                                                            const v = e.target.value;
+                                                                                            setDraftLocations((prev) => ({ ...prev, [cellKey]: v }));
+                                                                                            setOpenCombos((prev) => ({ ...prev, [cellKey]: true }));
+                                                                                            scheduleLocationSubmit(u.id, d.value, value, timeValue || null, v || null);
+                                                                                        }}
+                                                                                        onFocus={() => setOpenCombos((prev) => ({ ...prev, [cellKey]: true }))}
+                                                                                        onBlur={() => {
+                                                                                            setTimeout(() => setOpenCombos((prev) => ({ ...prev, [cellKey]: false })), 150);
+                                                                                            if (!skipBlurSubmitRef.current[cellKey]) {
+                                                                                                scheduleLocationSubmit(u.id, d.value, value, timeValue || null, (locationValue || null));
+                                                                                            }
+                                                                                            if (skipBlurSubmitRef.current[cellKey]) {
+                                                                                                delete skipBlurSubmitRef.current[cellKey];
+                                                                                            }
+                                                                                        }}
+
+                                                                                    />
+                                                                                    {openCombos[cellKey] && (
+                                                                                        <div id={`location-combobox-${cellKey}`} className="absolute z-10 mt-1 left-0 right-0 rounded-md border bg-popover shadow-md">
+                                                                                            {defaultLocations
+                                                                                                .filter((loc) => loc.toLowerCase().includes((locationValue || '').toLowerCase()))
+                                                                                                .map((loc) => (
+                                                                                                    <button
+                                                                                                        type="button"
+                                                                                                        key={loc}
+                                                                                                        className="w-full px-2 py-1.5 text-left text-sm hover:bg-accent"
+                                                                                                        onMouseDown={(e) => {
+                                                                                                            e.preventDefault();
+                                                                                                            skipBlurSubmitRef.current[cellKey] = true;
+                                                                                                        }}
+                                                                                                        onClick={() => {
+                                                                                                            setDraftLocations((prev) => ({ ...prev, [cellKey]: loc }));
+                                                                                                            setOpenCombos((prev) => ({ ...prev, [cellKey]: false }));
+                                                                                                            submitLocationImmediately(u.id, d.value, value, timeValue || null, loc);
+                                                                                                        }}
+                                                                                                    >
+                                                                                                        {loc}
+                                                                                                    </button>
+                                                                                                ))}
+                                                                                            {defaultLocations.filter((loc) => loc.toLowerCase().includes((locationValue || '').toLowerCase())).length === 0 && (
+                                                                                                <div className="px-2 py-1.5 text-sm text-muted-foreground">{t('No matches', 'No matches')}</div>
+                                                                                            )}
+                                                                                        </div>
+                                                                                    )}
+                                                                                </div>
+                                                                            ) : (
+                                                                                <span className={locationValue ? "text-xs" : "text-xs text-muted-foreground"}>{locationValue || '—'}</span>
+                                                                            )
                                                                         ) : (
-                                                                            <span className="text-xs text-muted-foreground">—</span>
-                                                                        )
-                                                                    )}
+                                                                            isSelf ? (
+                                                                                <div className="relative flex-1 min-w-0 sm:min-w-[100px]">
+                                                                                    <input
+                                                                                        type="text"
+                                                                                        className="h-8 w-full rounded-md border bg-muted px-2 text-sm text-muted-foreground"
+                                                                                        placeholder={t('Not needed', 'Not needed')}
+                                                                                        value=""
+                                                                                        disabled
+                                                                                        readOnly
+                                                                                    />
+                                                                                </div>
+                                                                            ) : (
+                                                                                <span className="text-xs text-muted-foreground">—</span>
+                                                                            )
+                                                                        )}
+                                                                    </div>
                                                                 </div>
                                                             </div>
                                                             {/* Action buttons column */}
@@ -705,12 +720,12 @@ export default function WeekStatusIndex() {
                                                             </div>
                                                         </div>
                                                     ) : (
-                                                        <div className="relative flex gap-1.5 w-full">
+                                                        <div className="relative flex gap-1.5 w-full items-start">
                                                             {/* Main content area */}
-                                                            <div className="flex-1 flex flex-col gap-1.5 group-hover:flex-[0_0_calc(100%-2.5rem)]">
+                                                            <div className="flex-1 flex flex-col gap-1.5">
                                                                 <div className="space-y-2">
                                                                     {value && (
-                                                                        <Badge variant={getStatusBadgeVariant(value)} className={`${getStatusBadgeClass(value)} ${getBadgeSizeClass()} font-semibold w-full justify-start`}>
+                                                                        <Badge variant={getStatusBadgeVariant(value)} className={`${getStatusBadgeClass(value) ? '' : ''}${getStatusBadgeClass(value)} ${getBadgeSizeClass()} font-semibold w-full justify-start text-left transition-all duration-150 group-hover:w-[calc(100%-2.5rem)]`}>
                                                                             {value === 'Lunchbox' ? t('Lunchbox', 'Lunchbox') : value === 'Buying' ? t('Buying', 'Buying') : t('Home', 'Home')}
                                                                         </Badge>
                                                                     )}
