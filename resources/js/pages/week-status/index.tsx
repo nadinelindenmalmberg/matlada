@@ -176,6 +176,13 @@ export default function WeekStatusIndex() {
     // (kept helper here earlier; removed as unused after switching to day-only mobile navigation)
 
     function submitUpdate(weekday: number, status: StatusValue, arrival_time: string | null, location: string | null, start_location?: string | null, eat_location?: string | null, note?: string | null) {
+        // Ensure we always persist all fields. If some are omitted, pull from current row or draft.
+        const current = getUserDay(statuses, canEditUserId, weekday) as any;
+        const cellKey = getCellKey(canEditUserId, weekday);
+        const finalEat = eat_location !== undefined ? eat_location : (draftEatLocations[cellKey] ?? (current?.eat_location ?? null));
+        const finalNote = note !== undefined ? note : (draftNotes[cellKey] ?? (current?.note ?? null));
+        const finalStart = start_location !== undefined ? start_location : (current?.start_location ?? null);
+
         router.post('/week-status',
             {
                 iso_week: week,
@@ -183,9 +190,9 @@ export default function WeekStatusIndex() {
                 status,
                 arrival_time,
                 location,
-                start_location,
-                eat_location,
-                note,
+                start_location: finalStart,
+                eat_location: finalEat,
+                note: finalNote,
             },
             {
                 preserveScroll: true,
@@ -247,6 +254,13 @@ export default function WeekStatusIndex() {
     }
 
     function postPartialUpdate(weekday: number, attrs: Record<string, string | null>, status: StatusValue, arrival_time: string | null, location: string | null) {
+        // Always include eat_location and note to avoid overwriting with null on partial saves
+        const current = getUserDay(statuses, canEditUserId, weekday) as any;
+        const cellKey = getCellKey(canEditUserId, weekday);
+        const mergedEat = attrs.hasOwnProperty('eat_location') ? attrs.eat_location : (draftEatLocations[cellKey] ?? (current?.eat_location ?? null));
+        const mergedNote = attrs.hasOwnProperty('note') ? attrs.note : (draftNotes[cellKey] ?? (current?.note ?? null));
+        const mergedStart = attrs.hasOwnProperty('start_location') ? attrs.start_location : (current?.start_location ?? null);
+
         router.post('/week-status',
             {
                 iso_week: week,
@@ -254,7 +268,9 @@ export default function WeekStatusIndex() {
                 status,
                 arrival_time,
                 location,
-                ...attrs,
+                start_location: mergedStart,
+                eat_location: mergedEat,
+                note: mergedNote,
             },
             {
                 preserveScroll: true,
@@ -335,7 +351,14 @@ export default function WeekStatusIndex() {
         };
     }
 
-    function generateNaturalStatusText(status: StatusValue, arrivalTime: string | null, location: string | null, t: (key: string, fallback?: string) => string): React.ReactNode {
+function generateNaturalStatusText(
+    status: StatusValue,
+    arrivalTime: string | null,
+    location: string | null,
+    eatLocation: string | null,
+    note: string | null,
+    t: (key: string, fallback?: string) => string
+): React.ReactNode {
         if (status === 'Home') {
             return t("I'll stay home", "I'll stay home");
         }
@@ -351,10 +374,18 @@ export default function WeekStatusIndex() {
                     {t("at location", "at ")}<span className="font-bold">{location}</span>
                 </>
             ) : t("at school", "at school");
+            const eatText = eatLocation ? (
+                <> · {t('eat at', 'eat at ')}<span className="font-bold">{eatLocation}</span></>
+            ) : null;
+            const noteText = note ? (
+                <> · <span className="italic text-muted-foreground">{note}</span></>
+            ) : null;
             return (
                 <>
                     {t("I'll arrive ", "I'll arrive ")}
                     {locationText} {timeText}
+                    {eatText}
+                    {noteText}
                 </>
             );
         }
@@ -370,15 +401,26 @@ export default function WeekStatusIndex() {
                     {t("at location", "at ")}<span className="font-bold">{location}</span>
                 </>
             ) : t("at school", "at school");
+            const eatText = eatLocation ? (
+                <> · {t('eat at', 'eat at ')}<span className="font-bold">{eatLocation}</span></>
+            ) : null;
+            const noteText = note ? (
+                <> · <span className="italic text-muted-foreground">{note}</span></>
+            ) : null;
             return (
                 <>
                     {t("I'll arrive ", "I'll arrive ")}
                     {locationText} {timeText}
+                    {eatText}
+                    {noteText}
                 </>
             );
         }
 
-        return t("No plans yet", "No plans yet");
+        const noteText = note ? (
+            <> · <span className="italic text-muted-foreground">{note}</span></>
+        ) : null;
+        return <>{t("No plans yet", "No plans yet")} {noteText}</>;
     }
 
     function setForAllDays(weekday: number) {
@@ -515,10 +557,13 @@ export default function WeekStatusIndex() {
                                                                                 value={value ?? undefined as unknown as string}
                                                                                 onValueChange={(v) => {
                                                                                     const newStatus = (v || null) as StatusValue;
-                                                                                    const isClearingFields = newStatus === 'Home' || newStatus === 'Away';
+                                                                                        const isClearingFields = newStatus === 'Home' || newStatus === 'Away';
                                                                                     const nextTime = isClearingFields ? null : (timeValue || null);
                                                                                     const nextLocation = isClearingFields ? null : (locationValue || null);
-                                                                                    submitUpdate(d.value, newStatus, nextTime, nextLocation);
+                                                                                        // When clearing, also clear eat and note; otherwise keep existing values
+                                                                                        const nextEat = isClearingFields ? null : (eatLocationValue || null);
+                                                                                        const nextNote = isClearingFields ? null : (noteValue || null);
+                                                                                        submitUpdate(d.value, newStatus, nextTime, nextLocation, undefined, nextEat, nextNote);
                                                                                 }}
                                                                                 className="grid grid-cols-2 gap-2"
                                                                                 aria-label={t('Lunch status', 'Lunch status')}
@@ -769,7 +814,7 @@ export default function WeekStatusIndex() {
                                                                         </Badge>
                                                                     )}
                                                                     <div className="text-sm text-foreground leading-relaxed text-left">
-                                                                        {generateNaturalStatusText(value, timeValue || null, locationValue || null, t)}
+                                                                        {generateNaturalStatusText(value, timeValue || null, locationValue || null, eatLocationValue || null, noteValue || null, t)}
                                                                     </div>
                                                                 </div>
                                                             </div>
