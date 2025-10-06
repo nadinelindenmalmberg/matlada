@@ -1,10 +1,5 @@
-# docker-compose.yml
-
-version: '3.8'
-
 services:
   app:
-    # Build the image from the Dockerfile in the current directory
     build: .
     restart: always
     command: >
@@ -15,9 +10,7 @@ services:
       --max-requests=500
 
     environment:
-      # Use variables from the .env file
       SERVER_NAME: ${APP_URL:-:80}
-      # Pass database credentials to the app
       DB_CONNECTION: ${DB_CONNECTION:-pgsql}
       DB_HOST: ${DB_HOST:-db}
       DB_PORT: ${DB_PORT:-5432}
@@ -26,21 +19,22 @@ services:
       DB_PASSWORD: ${DB_PASSWORD:-password}
     depends_on:
       db:
-        condition: service_healthy # Wait for the database to be ready
+        condition: service_healthy
+    networks:
+      - dokploy-network
+    ports:
+      - '8000:8000'
 
-  # PostgreSQL Database Service
   db:
     image: postgres:15
     restart: unless-stopped
     volumes:
-      # Persist database data
       - db-data:/var/lib/postgresql/data
     environment:
       POSTGRES_DB: ${DB_DATABASE:-laravel}
       POSTGRES_USER: ${DB_USERNAME:-sail}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
     ports:
-      # Optionally expose the database port to the host machine
       - '5432:5432'
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U ${DB_USERNAME:-sail} -d ${DB_DATABASE:-laravel}']
@@ -50,6 +44,9 @@ services:
     networks:
       - dokploy-network
 
-# Named volumes for data persistence
 volumes:
   db-data:
+
+networks:
+  dokploy-network:
+    driver: bridge

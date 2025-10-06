@@ -13,6 +13,7 @@
     "Lunchbox": "Matlåda",
     "Buying": "Köpa",
     "Home": "Hemma",
+    "Not with ya'll": "Inte med er",
     "Monday": "Måndag",
     "Tuesday": "Tisdag",
     "Wednesday": "Onsdag",
@@ -29,7 +30,7 @@
     "Unknown": "Okänt",
     "Total": "Totalt",
     "Lunch": "Lunch",
-    "Arrival": "Tid",
+    "Arrival": "Ankomst",
     "Previous day": "Föregående dag",
     "Next day": "Nästa dag",
     "Arrival time to school": "Ankomsttid",
@@ -120,5 +121,12 @@
     "Warning: This will override existing values for": "Varning: Detta kommer att skriva över befintliga värden för",
     "This will set the same values for all coming days in this week.": "Detta kommer att sätta samma värden för alla kommande dagar denna vecka.",
     "Cancel": "Avbryt",
-    "Confirm": "Bekräfta"
+    "Confirm": "Bekräfta",
+    "Arrival time": "Ankomsttid",
+    "Arrival location": "Ankomstplats",
+    "Notes for the day": "Anteckningar för dagen",
+    "Arrival time and location": "Ankomsttid och plats",
+    "Arrival not needed": "Ankomst inte behövs",
+    "Notes": "Anteckningar",
+    "Place to eat": "Plats att äta"
 }

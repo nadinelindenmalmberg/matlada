@@ -53,12 +53,26 @@ class WeekStatusController extends Controller
         $request->validate([
             'iso_week' => ['required', 'string', 'regex:/^\\d{4}-W\\d{2}$/'],
             'weekday' => ['required', 'integer', 'between:1,5'],
-            'status' => ['nullable', 'in:Lunchbox,Buying,Home'],
+            'status' => ['nullable', 'in:Lunchbox,Buying,Home,Away'],
             'arrival_time' => ['nullable', 'date_format:H:i'],
             'location' => ['nullable', 'string', 'max:120'],
+            'start_location' => ['nullable', 'string', 'max:120'],
+            'eat_location' => ['nullable', 'string', 'max:120'],
+            'note' => ['nullable', 'string'],
         ]);
 
         $userId = (int) $request->user()->id;
+
+        // Build only provided attributes to avoid nulling other fields on partial updates
+        $providedAttributes = [];
+        foreach (['status', 'arrival_time', 'location', 'start_location', 'eat_location', 'note'] as $attribute) {
+            if ($request->exists($attribute)) {
+                $providedAttributes[$attribute] = $request->input($attribute);
+            }
+        }
+
+        // Ensure keys exist, even if value is null, to intentionally clear fields when desired
+        // For example, when status is set to 'Home' we still pass arrival/location as null explicitly from the client
 
         UserDayStatus::updateOrCreate(
             [
@@ -66,11 +80,7 @@ class WeekStatusController extends Controller
                 'iso_week' => $request->string('iso_week')->toString(),
                 'weekday' => (int) $request->integer('weekday'),
             ],
-            [
-                'status' => $request->input('status'),
-                'arrival_time' => $request->input('arrival_time'),
-                'location' => $request->input('location'),
-            ]
+            $providedAttributes
         );
 
         return back();

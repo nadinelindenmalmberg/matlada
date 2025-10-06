@@ -13,6 +13,7 @@
     "Lunchbox": "Lunchbox",
     "Buying": "Buying",
     "Home": "Home",
+    "Not with ya'll": "Not with ya'll",
     "Monday": "Monday",
     "Tuesday": "Tuesday",
     "Wednesday": "Wednesday",
@@ -107,6 +108,11 @@
     "Warning: This will override existing values for": "Warning: This will override existing values for",
     "This will set the same values for all coming days in this week.": "This will set the same values for all coming days in this week.",
     "Cancel": "Cancel",
-    "Confirm": "Confirm"
-
+    "Confirm": "Confirm",
+    "Arrival time": "Arrival time",
+    "Arrival location": "Arrival location",
+    "Notes for the day": "Notes for the day",
+    "Arrival time and location": "Arrival time and location",
+    "Arrival not needed": "Arrival not needed",
+    "Notes": "Notes"
 }
