@@ -115,7 +115,7 @@
     "at time": "runt ",
     "at location": "till ",
     "sometime": "någon gång",
-    "at school": "i skolan",
+    "at school": "till skolan",
     "I'll arrive ": "Jag kommer ",
     "No plans yet": "Inga planer än",
     "Warning: This will override existing values for": "Varning: Detta kommer att skriva över befintliga värden för",
@@ -128,5 +128,10 @@
     "Arrival time and location": "Ankomsttid och plats",
     "Arrival not needed": "Ankomst inte behövs",
     "Notes": "Anteckning",
-    "Place to eat": "Plats att äta"
+    "Place to eat": "Plats att äta",
+    "and eat at": "och tänkte äta på ",
+    "Note:": "Anteckning:",
+    "I'll arrive and eat at": "Jag kommer och tänkte äta på ",
+    "I'll arrive at": "Jag kommer till",
+    "I'll arrive": "Jag kommer"
 }

@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverTrigger, PopoverContent } from '@/components/ui/popover';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { Icon } from '@/components/ui/icon';
 import { Copy as CopyIcon, ClipboardPaste as PasteIcon, Eraser as EraserIcon, CalendarRange as CalendarRangeIcon, MoreHorizontal as MoreHorizontalIcon, MapPin as MapPinIcon, UtensilsCrossed as UtensilsIcon, ShoppingCart as ShoppingCartIcon, Home as HomeIcon, Plane as PlaneIcon, StickyNote as StickyNoteIcon, ClockIcon, UsersIcon, SandwichIcon } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
@@ -374,20 +375,16 @@ function generateNaturalStatusText(
                     {t("at location", "at ")}<span className="font-bold">{location}</span>
                 </>
             ) : t("at school", "at school");
-            const eatText = eatLocation ? (
-                <> · {t('eat at', 'eat at ')}<span className="font-bold">{eatLocation}</span></>
-            ) : null;
-            const noteText = note ? (
-                <> · <span className="italic text-muted-foreground">{note}</span></>
-            ) : null;
-            return (
-                <>
-                    {t("I'll arrive ", "I'll arrive ")}
-                    {locationText} {timeText}
-                    {eatText}
-                    {noteText}
-                </>
-            );
+            const parts: React.ReactNode[] = [
+                t("I'll arrive", "I'll arrive"),
+                locationText,
+                timeText,
+            ];
+            // Eat location intentionally omitted from natural language for others view
+            if (note) {
+                parts.push(<span className="italic text-muted-foreground">— {note}</span>);
+            }
+            return <>{parts.map((p, i) => <React.Fragment key={i}>{i > 0 ? ' ' : ''}{p}</React.Fragment>)}</>;
         }
 
         if (status === 'Buying') {
@@ -401,26 +398,23 @@ function generateNaturalStatusText(
                     {t("at location", "at ")}<span className="font-bold">{location}</span>
                 </>
             ) : t("at school", "at school");
-            const eatText = eatLocation ? (
-                <> · {t('eat at', 'eat at ')}<span className="font-bold">{eatLocation}</span></>
-            ) : null;
-            const noteText = note ? (
-                <> · <span className="italic text-muted-foreground">{note}</span></>
-            ) : null;
-            return (
-                <>
-                    {t("I'll arrive ", "I'll arrive ")}
-                    {locationText} {timeText}
-                    {eatText}
-                    {noteText}
-                </>
-            );
+            const parts: React.ReactNode[] = [
+                t("I'll arrive", "I'll arrive"),
+                locationText,
+                timeText,
+            ];
+            // Eat location intentionally omitted from natural language for others view
+            if (note) {
+                parts.push(<span className="italic text-muted-foreground">— {note}</span>);
+            }
+            return <>{parts.map((p, i) => <React.Fragment key={i}>{i > 0 ? ' ' : ''}{p}</React.Fragment>)}</>;
         }
 
-        const noteText = note ? (
-            <> · <span className="italic text-muted-foreground">{note}</span></>
-        ) : null;
-        return <>{t("No plans yet", "No plans yet")} {noteText}</>;
+        const parts: React.ReactNode[] = [t("No plans yet", "No plans yet")];
+        if (note) {
+            parts.push(<span className="italic text-muted-foreground">— {note}</span>);
+        }
+        return <>{parts.map((p, i) => <React.Fragment key={i}>{i > 0 ? ' ' : ''}{p}</React.Fragment>)}</>;
     }
 
     function setForAllDays(weekday: number) {
@@ -544,8 +538,8 @@ function generateNaturalStatusText(
                                                 <TableCell key={d.value} className={`group border-l align-top p-2 w-[200px] min-w-[200px] ${d.value !== activeDayMobile ? 'hidden sm:table-cell' : ''}`}>
                                                     {isSelf ? (
                                                         <div className="relative flex gap-1.5 w-full group items-start">
-                                                            {/* Main content area (reserve space above for actions) */}
-                                                            <div className="flex-1 flex flex-col gap-2 pt-6">
+                                                            {/* Main content area (no extra vertical space for actions) */}
+                                                            <div className="flex-1 flex flex-col gap-2 pt-4">
 
                                                                 {/* Lunch status */}
                                                                 <div className="flex flex-col gap-1">
@@ -573,7 +567,7 @@ function generateNaturalStatusText(
                                                                                     className={`${value === 'Lunchbox' ? getStatusBadgeClass('Lunchbox') + ' text-white' : 'bg-muted text-muted-foreground border-transparent'} px-2 gap-1 w-full justify-center rounded-md first:rounded-md last:rounded-md cursor-pointer`}
                                                                                     aria-label={t('Lunchbox', 'Lunchbox')}
                                                                                 >
-                                                                                    <Icon iconNode={SandwichIcon} className="size-3.5" />
+                                                                                    <Icon iconNode={UtensilsIcon} className="size-3.5" />
                                                                                     <span className="sr-only sm:not-sr-only">{t('Lunchbox', 'Lunchbox')}</span>
                                                                                 </ToggleGroupItem>
                                                                                 <ToggleGroupItem
@@ -606,7 +600,7 @@ function generateNaturalStatusText(
                                                                                 <InputGroup aria-labelledby={`eat-label-${cellKey}`}>
                                                                                     <span id={`eat-label-${cellKey}`} className="sr-only">{t('Place to eat', 'Place to eat')}</span>
                                                                                     <InputGroupAddon align="inline-start" aria-hidden="true">
-                                                                                        <Icon iconNode={UtensilsIcon} className="size-4 text-muted-foreground" />
+                                                                                        <Icon iconNode={MapPinIcon} className="size-4 text-muted-foreground" />
                                                                                     </InputGroupAddon>
                                                                                     <InputGroupInput
                                                                                         id={`eat-location-${cellKey}`}
@@ -642,7 +636,7 @@ function generateNaturalStatusText(
                                                                     <div className="text-[10px] uppercase tracking-wide text-muted-foreground">{t('Arrival', 'Arrival')}</div>
                                                                     {isSelf ? (
                                                                         value !== 'Home' ? (
-                                                                            <div className="grid grid-cols-2 gap-2">
+                                                                            <div className="grid [grid-template-columns:auto_1fr] gap-2">
                                                                                 <InputGroup aria-labelledby={`arrival-time-label-${cellKey}`}>
                                                                                     <span id={`arrival-time-label-${cellKey}`} className="sr-only">{t('Arrival time', 'Arrival time')}</span>
                                                                                     <InputGroupAddon align="inline-start" aria-hidden="true">
@@ -650,9 +644,11 @@ function generateNaturalStatusText(
                                                                                     </InputGroupAddon>
                                                                                     <InputGroupInput
                                                                                         id={`arrival-time-${cellKey}`}
-                                                                                        className="text-muted-foreground text-center"
+                                                                                        className={`${timeValue ? 'text-white' : 'text-muted-foreground'} text-center w-[84px]`
+                                                                                        }
                                                                                         type="time"
                                                                                         step={60}
+                                                                                        lang="sv-SE"
                                                                                         aria-label={t('Arrival time to school', 'Arrival time to school')}
                                                                                         title={t('Arrival time to school', 'Arrival time to school')}
                                                                                         value={timeValue || ''}
@@ -675,6 +671,7 @@ function generateNaturalStatusText(
                                                                                         placeholder={t('Where you will be at that time', 'Where you will be at that time')}
                                                                                         aria-label={t('Location where you will be at that time', 'Location where you will be at that time')}
                                                                                         value={locationValue}
+                                                                                        className="w-full"
                                                                                         onChange={(e) => {
                                                                                             const v = (e.target as HTMLInputElement).value;
                                                                                             setDraftLocations((prev) => ({ ...prev, [cellKey]: v }));
@@ -708,7 +705,7 @@ function generateNaturalStatusText(
                                                                 </div>
 
                                                                 {/* Section: Notes (own row) */}
-                                                                <div className="flex flex-col gap-1">
+                                                                <div className={`flex flex-col gap-1 ${isSelf ? 'pb-2' : ''}`}>
                                                                     <div className="text-[10px] uppercase tracking-wide text-muted-foreground">{t('Notes', 'Notes')}</div>
                                                                     <div className="flex items-center gap-2">
                                                                         {isSelf ? (
@@ -738,69 +735,57 @@ function generateNaturalStatusText(
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                            {/* Self-only action buttons column (button group) */}
-                                                            <div className="absolute right-0 top-0 flex flex-row gap-0.5 w-fit items-center justify-center pointer-events-auto">
-                                                                <Tooltip delayDuration={500}>
-                                                                    <TooltipTrigger asChild>
+                                                            {/* Self-only actions: conditional paste + dropdown */}
+                                                            <div className="absolute right-0 top-0 w-fit pointer-events-auto flex items-center gap-1">
+                                                                {copiedData ? (
+                                                                    <Tooltip delayDuration={500}>
+                                                                        <TooltipTrigger asChild>
+                                                                            <Button
+                                                                                type="button"
+                                                                                variant="ghost"
+                                                                                size="icon"
+                                                                                className="h-5 w-5 p-0"
+                                                                                aria-label={t('Paste day', 'Paste day')}
+                                                                                onClick={() => pasteDayData(d.value)}
+                                                                            >
+                                                                                <Icon iconNode={PasteIcon} className="size-3.5" />
+                                                                            </Button>
+                                                                        </TooltipTrigger>
+                                                                        <TooltipContent>{t('Paste day', 'Paste day')}</TooltipContent>
+                                                                    </Tooltip>
+                                                                ) : null}
+                                                                <DropdownMenu>
+                                                                    <DropdownMenuTrigger asChild>
                                                                         <Button
                                                                             type="button"
                                                                             variant="ghost"
                                                                             size="icon"
-                                                                            className="size-7"
-                                                                            aria-label={t('Copy day', 'Copy day')}
-                                                                            onClick={() => copyDayData(d.value)}
+                                                                            className="h-5 w-5 p-0"
+                                                                            aria-label={t('Actions', 'Actions')}
                                                                         >
+                                                                            <Icon iconNode={MoreHorizontalIcon} className="size-3.5" />
+                                                                        </Button>
+                                                                    </DropdownMenuTrigger>
+                                                                    <DropdownMenuContent align="end">
+                                                                        <DropdownMenuItem onSelect={() => copyDayData(d.value)}>
                                                                             <Icon iconNode={CopyIcon} className="size-4" />
-                                                                        </Button>
-                                                                    </TooltipTrigger>
-                                                                    <TooltipContent>{t('Copy day', 'Copy day')}</TooltipContent>
-                                                                </Tooltip>
-                                                                <Tooltip delayDuration={500}>
-                                                                    <TooltipTrigger asChild>
-                                                                        <Button
-                                                                            type="button"
-                                                                            variant="ghost"
-                                                                            size="icon"
-                                                                            className="size-7"
-                                                                            aria-label={t('Paste day', 'Paste day')}
-                                                                            onClick={() => pasteDayData(d.value)}
-                                                                            disabled={!copiedData}
-                                                                        >
+                                                                            {t('Copy day', 'Copy day')}
+                                                                        </DropdownMenuItem>
+                                                                        <DropdownMenuItem disabled={!copiedData} onSelect={() => pasteDayData(d.value)}>
                                                                             <Icon iconNode={PasteIcon} className="size-4" />
-                                                                        </Button>
-                                                                    </TooltipTrigger>
-                                                                    <TooltipContent>{t('Paste day', 'Paste day')}</TooltipContent>
-                                                                </Tooltip>
-                                                                <Tooltip delayDuration={500}>
-                                                                    <TooltipTrigger asChild>
-                                                                        <Button
-                                                                            type="button"
-                                                                            variant="ghost"
-                                                                            size="icon"
-                                                                            className="size-7"
-                                                                            aria-label={t('Clear status', 'Clear status')}
-                                                                            onClick={() => clearStatus(d.value)}
-                                                                        >
-                                                                            <Icon iconNode={EraserIcon} className="size-4" />
-                                                                        </Button>
-                                                                    </TooltipTrigger>
-                                                                    <TooltipContent>{t('Clear status', 'Clear status')}</TooltipContent>
-                                                                </Tooltip>
-                                                                <Tooltip delayDuration={500}>
-                                                                    <TooltipTrigger asChild>
-                                                                        <Button
-                                                                            type="button"
-                                                                            variant="ghost"
-                                                                            size="icon"
-                                                                            className="size-7"
-                                                                            aria-label={t('Set for all coming days', 'Set for all coming days')}
-                                                                            onClick={() => setForAllDays(d.value)}
-                                                                        >
+                                                                            {t('Paste day', 'Paste day')}
+                                                                        </DropdownMenuItem>
+                                                                        <DropdownMenuSeparator />
+                                                                        <DropdownMenuItem onSelect={() => setForAllDays(d.value)}>
                                                                             <Icon iconNode={CalendarRangeIcon} className="size-4" />
-                                                                        </Button>
-                                                                    </TooltipTrigger>
-                                                                    <TooltipContent>{t('Set for all coming days', 'Set for all coming days')}</TooltipContent>
-                                                                </Tooltip>
+                                                                            {t('Set for all coming days', 'Set for all coming days')}
+                                                                        </DropdownMenuItem>
+                                                                        <DropdownMenuItem variant="destructive" onSelect={() => clearStatus(d.value)}>
+                                                                            <Icon iconNode={EraserIcon} className="size-4" />
+                                                                            {t('Clear status', 'Clear status')}
+                                                                        </DropdownMenuItem>
+                                                                    </DropdownMenuContent>
+                                                                </DropdownMenu>
                                                             </div>
                                                         </div>
                                                     ) : (
@@ -810,7 +795,28 @@ function generateNaturalStatusText(
                                                                 <div className="space-y-2">
                                                                     {value && (
                                                                         <Badge variant={getStatusBadgeVariant(value)} className={`${getStatusBadgeClass(value)} ${getBadgeSizeClass()} font-semibold w-full justify-start`}>
-                                                                            {value === 'Lunchbox' ? t('Lunchbox', 'Lunchbox') : value === 'Buying' ? t('Buying', 'Buying') : value === 'Home' ? t('Home', 'Home') : t('Not with ya\'ll', 'Not with ya\'ll')}
+                                                                            <span className="inline-flex items-center gap-1.5">
+                                                                                <Icon
+                                                                                    iconNode={
+                                                                                        value === 'Lunchbox'
+                                                                                            ? UtensilsIcon
+                                                                                            : value === 'Buying'
+                                                                                                ? ShoppingCartIcon
+                                                                                                : value === 'Home'
+                                                                                                    ? HomeIcon
+                                                                                                    : UsersIcon
+                                                                                    }
+                                                                                    className="size-3.5"
+                                                                                />
+                                                                                {value === 'Lunchbox' ? t('Lunchbox', 'Lunchbox') : value === 'Buying' ? t('Buying', 'Buying') : value === 'Home' ? t('Home', 'Home') : t('Not with ya\'ll', 'Not with ya\'ll')}
+                                                                            </span>
+                                                                            {eatLocationValue ? (
+                                                                                <span className="ml-2 inline-flex items-center gap-1 font-normal">
+                                                                                    <span className="opacity-60">—</span>
+                                                                                    <Icon iconNode={MapPinIcon} className="size-3.5" />
+                                                                                    <span className="truncate max-w-[8rem]">{eatLocationValue}</span>
+                                                                                </span>
+                                                                            ) : null}
                                                                         </Badge>
                                                                     )}
                                                                     <div className="text-sm text-foreground leading-relaxed text-left">
