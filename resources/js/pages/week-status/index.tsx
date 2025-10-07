@@ -86,19 +86,19 @@ function getStatusBadgeClass(status: StatusValue): string {
     // Tailwind utility colors with dark mode variants
     if (status === 'Lunchbox') {
         // Emerald (matched lightness) ensure max contrast
-        return 'bg-emerald-600 text-white border-transparent dark:bg-emerald-800 dark:text-white';
+        return '!bg-emerald-600 !text-white border-transparent dark:!bg-emerald-800 dark:!text-white data-[state=on]:!bg-emerald-600 data-[state=on]:!text-white dark:data-[state=on]:!bg-emerald-800 dark:data-[state=on]:!text-white';
     }
     if (status === 'Buying') {
         // Amber (matched lightness) with dark text for better contrast
-        return 'bg-amber-600 text-white border-transparent dark:bg-amber-800 dark:text-white';
+        return '!bg-amber-600 !text-white border-transparent dark:!bg-amber-800 dark:!text-white data-[state=on]:!bg-amber-600 data-[state=on]:!text-white dark:data-[state=on]:!bg-amber-800 dark:data-[state=on]:!text-white';
     }
     if (status === 'Home') {
         // Rose (matched lightness) ensure max contrast
-        return 'bg-rose-600 text-white border-transparent dark:bg-rose-800 dark:text-white';
+        return '!bg-rose-600 !text-white border-transparent dark:!bg-rose-800 dark:!text-white data-[state=on]:!bg-rose-600 data-[state=on]:!text-white dark:data-[state=on]:!bg-rose-800 dark:data-[state=on]:!text-white';
     }
     if (status === 'Away') {
         // Indigo to indicate away
-        return 'bg-indigo-600 text-white border-transparent dark:bg-indigo-800 dark:text-white';
+        return '!bg-indigo-600 !text-white border-transparent dark:!bg-indigo-800 dark:!text-white data-[state=on]:!bg-indigo-600 data-[state=on]:!text-white dark:data-[state=on]:!bg-indigo-800 dark:data-[state=on]:!text-white';
     }
     return '';
 }
@@ -352,14 +352,14 @@ export default function WeekStatusIndex() {
         };
     }
 
-function generateNaturalStatusText(
-    status: StatusValue,
-    arrivalTime: string | null,
-    location: string | null,
-    eatLocation: string | null,
-    note: string | null,
-    t: (key: string, fallback?: string) => string
-): React.ReactNode {
+    function generateNaturalStatusText(
+        status: StatusValue,
+        arrivalTime: string | null,
+        location: string | null,
+        eatLocation: string | null,
+        note: string | null,
+        t: (key: string, fallback?: string) => string
+    ): React.ReactNode {
         if (status === 'Home') {
             return t("I'll stay home", "I'll stay home");
         }
@@ -532,8 +532,8 @@ function generateNaturalStatusText(
                                             const timeValue = current?.arrival_time ?? '';
                                             const cellKey = getCellKey(u.id, d.value);
                                             const locationValue = (draftLocations[cellKey] ?? (current?.location ?? ''));
-                                            const eatLocationValue = (draftEatLocations[cellKey] ?? ((current as any)?.eat_location ?? ''));
-                                            const noteValue = (draftNotes[cellKey] ?? ((current as any)?.note ?? ''));
+                                            const eatLocationValue = (draftEatLocations[cellKey] ?? (current?.eat_location ?? ''));
+                                            const noteValue = (draftNotes[cellKey] ?? (current?.note ?? ''));
                                             return (
                                                 <TableCell key={d.value} className={`group border-l align-top p-2 w-[200px] min-w-[200px] ${d.value !== activeDayMobile ? 'hidden sm:table-cell' : ''}`}>
                                                     {isSelf ? (
@@ -551,13 +551,13 @@ function generateNaturalStatusText(
                                                                                 value={value ?? undefined as unknown as string}
                                                                                 onValueChange={(v) => {
                                                                                     const newStatus = (v || null) as StatusValue;
-                                                                                        const isClearingFields = newStatus === 'Home' || newStatus === 'Away';
+                                                                                    const isClearingFields = newStatus === 'Home' || newStatus === 'Away';
                                                                                     const nextTime = isClearingFields ? null : (timeValue || null);
                                                                                     const nextLocation = isClearingFields ? null : (locationValue || null);
-                                                                                        // When clearing, also clear eat and note; otherwise keep existing values
-                                                                                        const nextEat = isClearingFields ? null : (eatLocationValue || null);
-                                                                                        const nextNote = isClearingFields ? null : (noteValue || null);
-                                                                                        submitUpdate(d.value, newStatus, nextTime, nextLocation, undefined, nextEat, nextNote);
+                                                                                    // When clearing, also clear eat and note; otherwise keep existing values
+                                                                                    const nextEat = isClearingFields ? null : (eatLocationValue || null);
+                                                                                    const nextNote = isClearingFields ? null : (noteValue || null);
+                                                                                    submitUpdate(d.value, newStatus, nextTime, nextLocation, undefined, nextEat, nextNote);
                                                                                 }}
                                                                                 className="grid grid-cols-2 gap-2"
                                                                                 aria-label={t('Lunch status', 'Lunch status')}
@@ -588,7 +588,7 @@ function generateNaturalStatusText(
                                                                                 </ToggleGroupItem>
                                                                                 <ToggleGroupItem
                                                                                     value="Away"
-                                    className={`${value === 'Away' ? getStatusBadgeClass('Away') + ' text-white' : 'bg-muted text-muted-foreground border-transparent'} px-2 gap-1 w-full justify-center rounded-md first:rounded-md last:rounded-md cursor-pointer`}
+                                                                                    className={`${value === 'Away' ? getStatusBadgeClass('Away') + ' text-white' : 'bg-muted text-muted-foreground border-transparent'} px-2 gap-1 w-full justify-center rounded-md first:rounded-md last:rounded-md cursor-pointer`}
                                                                                     aria-label={t('Not with ya\'ll', 'Not with ya\'ll')}
                                                                                 >
                                                                                     <Icon iconNode={UsersIcon} className="size-3.5" />
