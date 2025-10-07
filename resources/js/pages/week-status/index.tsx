@@ -488,7 +488,9 @@ export default function WeekStatusIndex() {
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead className="w-[200px] min-w-[200px]">{t('User', 'User')}</TableHead>
+                                    <TableHead className="w-[52px] min-w-[52px] text-center sm:w-[200px] sm:min-w-[200px] sm:text-left">
+                                        <span className="sr-only sm:not-sr-only">{t('User', 'User')}</span>
+                                    </TableHead>
                                     {weekdays.map((d) => {
                                         const date = getDateFromIsoWeek(week, d.value);
                                         const isToday = isSameLocalDate(date, new Date());
@@ -514,15 +516,15 @@ export default function WeekStatusIndex() {
                             <TableBody>
                                 {users.map((u) => (
                                     <TableRow key={u.id} className="hover:bg-transparent">
-                                        <TableCell className="whitespace-nowrap align-middle p-2 w-[200px] min-w-[200px]">
-                                            <div className="flex items-center gap-2">
-                                                <Avatar className="h-8 w-8 overflow-hidden rounded-full">
+                                        <TableCell className="whitespace-nowrap align-middle p-2 w-[52px] min-w-[52px] text-center sm:w-[200px] sm:min-w-[200px] sm:text-left">
+                                            <div className="flex items-center justify-center gap-0 sm:justify-start sm:gap-2">
+                                                <Avatar className="h-8 w-8 overflow-hidden rounded-full mx-auto sm:mx-0">
                                                     <AvatarImage src={(u as UserWithAvatar).avatar_url} alt={u.name} />
                                                     <AvatarFallback className="rounded-full bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
                                                         {getInitials(u.name)}
                                                     </AvatarFallback>
                                                 </Avatar>
-                                                <span className="font-medium">{u.name}</span>
+                                                <span className="hidden sm:inline font-medium">{u.name}</span>
                                             </div>
                                         </TableCell>
                                         {weekdays.map((d) => {
