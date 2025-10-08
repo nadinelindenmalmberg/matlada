@@ -12,9 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('user_day_statuses', function (Blueprint $table) {
-            // Drop the old unique constraint
-            $table->dropUnique('user_day_statuses_new_user_id_iso_week_weekday_unique');
-            
+            // Drop the old unique constraint (uses Laravel's default index naming)
+            $table->dropUnique(['user_id', 'iso_week', 'weekday']);
+
             // Add the new unique constraint that includes group_id
             $table->unique(['user_id', 'group_id', 'iso_week', 'weekday']);
         });
