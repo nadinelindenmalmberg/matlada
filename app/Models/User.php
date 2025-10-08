@@ -66,6 +66,34 @@ class User extends Authenticatable
     }
 
     /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany<\App\Models\Group>
+     */
+    public function groups()
+    {
+        return $this->belongsToMany(Group::class)
+            ->withPivot(['role', 'joined_at'])
+            ->withTimestamps();
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Group>
+     */
+    public function createdGroups()
+    {
+        return $this->hasMany(Group::class, 'created_by');
+    }
+
+    public function isAdminOf(Group $group): bool
+    {
+        return $group->isAdmin($this);
+    }
+
+    public function isMemberOf(Group $group): bool
+    {
+        return $group->isMember($this);
+    }
+
+    /**
      * Get the absolute URL to the user's avatar image.
      */
     public function getAvatarUrlAttribute(): ?string

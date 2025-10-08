@@ -27,6 +27,8 @@ services:
     depends_on:
       db:
         condition: service_healthy # Wait for the database to be ready
+    networks:
+      - app-network
 
   # PostgreSQL Database Service
   db:
@@ -48,8 +50,13 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - dokploy-network
+      - app-network
 
 # Named volumes for data persistence
 volumes:
   db-data:
+
+# Networks
+networks:
+  app-network:
+    driver: bridge

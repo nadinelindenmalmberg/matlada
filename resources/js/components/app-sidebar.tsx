@@ -1,6 +1,6 @@
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
-import { CalendarCheck, Heart, LineChart } from 'lucide-react';
+import { CalendarCheck, Heart, LineChart, Users } from 'lucide-react';
 import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
@@ -15,6 +15,11 @@ const mainNavItems: NavItem[] = [
         title: 'Vecka',
         href: '/week-status',
         icon: CalendarCheck,
+    },
+    {
+        title: 'Groups',
+        href: '/groups',
+        icon: Users,
     },
     {
         title: 'Alignment',
