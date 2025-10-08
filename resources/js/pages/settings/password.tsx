@@ -21,18 +21,18 @@ export default function Password() {
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
-            title: t('Password settings'),
+            title: t('Password settings', 'Password settings'),
             href: edit().url,
         },
     ];
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title={t('Password settings')} />
+            <Head title={t('Password settings', 'Password settings')} />
 
             <SettingsLayout>
                 <div className="space-y-6">
-                    <HeadingSmall title={t('Update password')} description={t('Ensure your account is using a long, random password to stay secure')} />
+                    <HeadingSmall title={t('Update password', 'Update password')} description={t('Ensure your account is using a long, random password to stay secure', 'Ensure your account is using a long, random password to stay secure')} />
 
                     <Form
                         {...PasswordController.update.form()}
@@ -55,7 +55,7 @@ export default function Password() {
                         {({ errors, processing, recentlySuccessful }) => (
                             <>
                                 <div className="grid gap-2">
-                                    <Label htmlFor="current_password">{t('Current password')}</Label>
+                                    <Label htmlFor="current_password">{t('Current password', 'Current password')}</Label>
 
                                     <Input
                                         id="current_password"
@@ -64,14 +64,14 @@ export default function Password() {
                                         type="password"
                                         className="mt-1 block w-full"
                                         autoComplete="current-password"
-                                        placeholder={t('Current password')}
+                                        placeholder={t('Current password', 'Current password')}
                                     />
 
                                     <InputError message={errors.current_password} />
                                 </div>
 
                                 <div className="grid gap-2">
-                                    <Label htmlFor="password">{t('New password')}</Label>
+                                    <Label htmlFor="password">{t('New password', 'New password')}</Label>
 
                                     <Input
                                         id="password"
@@ -80,14 +80,14 @@ export default function Password() {
                                         type="password"
                                         className="mt-1 block w-full"
                                         autoComplete="new-password"
-                                        placeholder={t('New password')}
+                                        placeholder={t('New password', 'New password')}
                                     />
 
                                     <InputError message={errors.password} />
                                 </div>
 
                                 <div className="grid gap-2">
-                                    <Label htmlFor="password_confirmation">{t('Confirm password')}</Label>
+                                    <Label htmlFor="password_confirmation">{t('Confirm password', 'Confirm password')}</Label>
 
                                     <Input
                                         id="password_confirmation"
@@ -95,14 +95,14 @@ export default function Password() {
                                         type="password"
                                         className="mt-1 block w-full"
                                         autoComplete="new-password"
-                                        placeholder={t('Confirm password')}
+                                        placeholder={t('Confirm password', 'Confirm password')}
                                     />
 
                                     <InputError message={errors.password_confirmation} />
                                 </div>
 
                                 <div className="flex items-center gap-4">
-                                    <Button disabled={processing} data-test="update-password-button">{t('Save password')}</Button>
+                                    <Button disabled={processing} data-test="update-password-button">{t('Save password', 'Save password')}</Button>
 
                                     <Transition
                                         show={recentlySuccessful}
@@ -111,7 +111,7 @@ export default function Password() {
                                         leave="transition ease-in-out"
                                         leaveTo="opacity-0"
                                     >
-                                        <p className="text-sm text-neutral-600">{t('Saved')}</p>
+                                        <p className="text-sm text-neutral-600">{t('Saved', 'Saved')}</p>
                                     </Transition>
                                 </div>
                             </>

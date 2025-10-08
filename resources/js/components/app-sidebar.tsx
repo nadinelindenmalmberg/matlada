@@ -35,8 +35,8 @@ const footerNavItems: NavItem[] = [
         icon: Github,
     },
     {
-        title: 'Made by Filip Sjölander',
-        href: 'https://github.com/filipsjolanderr',
+        title: 'Made by IT21\'s best',
+        href: 'https://github.com/filipsjolanderr/matlada',
         icon: Heart,
     },
 ];

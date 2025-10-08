@@ -3,14 +3,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Label } from '@/components/ui/label';
-import { 
-    ArrowLeft, 
-    Users, 
-    Copy, 
-    ExternalLink, 
-    Settings, 
-    Trash2, 
-    UserMinus, 
+import {
+    ArrowLeft,
+    Users,
+    Copy,
+    ExternalLink,
+    Settings,
+    Trash2,
+    UserMinus,
     UserCheck,
     Crown,
     Calendar
@@ -60,7 +60,7 @@ export default function GroupShow({ group }: PageProps) {
     const [copiedItems, setCopiedItems] = useState<Record<string, boolean>>({});
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Groups', href: '/groups' },
+        { title: t('Groups', 'Groups'), href: '/groups' },
         { title: group.name, href: `/groups/${group.id}` }
     ];
 
@@ -77,7 +77,7 @@ export default function GroupShow({ group }: PageProps) {
     };
 
     const handleRemoveMember = (userId: number) => {
-        if (confirm('Are you sure you want to remove this member from the group?')) {
+        if (confirm(t('Are you sure you want to remove this member from the group?', 'Are you sure you want to remove this member from the group?'))) {
             router.delete(`/groups/${group.id}/members`, {
                 data: { user_id: userId }
             });
@@ -92,13 +92,13 @@ export default function GroupShow({ group }: PageProps) {
     };
 
     const handleLeaveGroup = () => {
-        if (confirm('Are you sure you want to leave this group?')) {
+        if (confirm(t('Are you sure you want to leave this group?', 'Are you sure you want to leave this group?'))) {
             router.delete(`/groups/${group.id}/leave`);
         }
     };
 
     const handleDeleteGroup = () => {
-        if (confirm('Are you sure you want to delete this group? This action cannot be undone and will remove all group data.')) {
+        if (confirm(t('Are you sure you want to delete this group? This action cannot be undone and will remove all group data.', 'Are you sure you want to delete this group? This action cannot be undone and will remove all group data.'))) {
             router.delete(`/groups/${group.id}`);
         }
     };
@@ -120,13 +120,13 @@ export default function GroupShow({ group }: PageProps) {
                         )}
                         <div className="flex items-center gap-2 mt-2">
                             <Badge variant="outline">
-                                {group.users.length} member{group.users.length !== 1 ? 's' : ''}
+                                {group.users.length} {group.users.length !== 1 ? t('members', 'members') : t('member', 'member')}
                             </Badge>
                             {group.is_admin && (
-                                <Badge variant="secondary">Admin</Badge>
+                                <Badge variant="secondary">{t('Admin', 'Admin')}</Badge>
                             )}
                             {group.is_creator && (
-                                <Badge variant="default">Creator</Badge>
+                                <Badge variant="default">{t('Creator', 'Creator')}</Badge>
                             )}
                         </div>
                     </div>
@@ -134,12 +134,12 @@ export default function GroupShow({ group }: PageProps) {
                         <Button asChild>
                             <Link href={`/week-status?group=${group.id}`}>
                                 <Calendar className="h-4 w-4 mr-2" />
-                                View Week Status
+                                {t('View Week Status', 'View Week Status')}
                             </Link>
                         </Button>
                         {!group.is_creator && (
                             <Button variant="outline" onClick={handleLeaveGroup}>
-                                Leave Group
+                                {t('Leave Group', 'Leave Group')}
                             </Button>
                         )}
                     </div>
@@ -151,13 +151,13 @@ export default function GroupShow({ group }: PageProps) {
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <Settings className="h-5 w-5" />
-                                Group Information
+                                {t('Group Information', 'Group Information')}
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             {/* Group Code */}
                             <div className="space-y-2">
-                                <Label className="text-sm font-medium">Group Code</Label>
+                                <Label className="text-sm font-medium">{t('Group Code', 'Group Code')}</Label>
                                 <div className="flex items-center gap-2">
                                     <code className="bg-muted px-3 py-2 rounded text-sm font-mono flex-1">
                                         {group.code}
@@ -170,14 +170,14 @@ export default function GroupShow({ group }: PageProps) {
                                         <Copy className="h-4 w-4" />
                                     </Button>
                                     {copiedItems.code && (
-                                        <span className="text-xs text-green-600">Copied!</span>
+                                        <span className="text-xs text-green-600">{t('Copied!', 'Copied!')}</span>
                                     )}
                                 </div>
                             </div>
 
                             {/* Invite Link */}
                             <div className="space-y-2">
-                                <Label className="text-sm font-medium">Invite Link</Label>
+                                <Label className="text-sm font-medium">{t('Invite Link', 'Invite Link')}</Label>
                                 <div className="flex items-center gap-2">
                                     <code className="bg-muted px-3 py-2 rounded text-sm font-mono flex-1 truncate">
                                         {group.invite_link_url}
@@ -190,7 +190,7 @@ export default function GroupShow({ group }: PageProps) {
                                         <ExternalLink className="h-4 w-4" />
                                     </Button>
                                     {copiedItems.link && (
-                                        <span className="text-xs text-green-600">Copied!</span>
+                                        <span className="text-xs text-green-600">{t('Copied!', 'Copied!')}</span>
                                     )}
                                 </div>
                             </div>
@@ -198,7 +198,7 @@ export default function GroupShow({ group }: PageProps) {
                             {/* Created Info */}
                             <div className="pt-2 border-t">
                                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                    <span>Created by</span>
+                                    <span>{t('Created by', 'Created by')}</span>
                                     <div className="flex items-center gap-2">
                                         <Avatar className="h-6 w-6">
                                             <AvatarImage src={group.creator.avatar} />
@@ -217,7 +217,7 @@ export default function GroupShow({ group }: PageProps) {
                             {/* Danger Zone */}
                             {group.is_creator && (
                                 <div className="pt-4 border-t">
-                                    <h4 className="text-sm font-medium text-destructive mb-2">Danger Zone</h4>
+                                    <h4 className="text-sm font-medium text-destructive mb-2">{t('Danger Zone', 'Danger Zone')}</h4>
                                     <Button
                                         variant="outline"
                                         size="sm"
@@ -225,7 +225,7 @@ export default function GroupShow({ group }: PageProps) {
                                         className="text-destructive hover:text-destructive"
                                     >
                                         <Trash2 className="h-4 w-4 mr-2" />
-                                        Delete Group
+                                        {t('Delete Group', 'Delete Group')}
                                     </Button>
                                 </div>
                             )}
@@ -237,7 +237,7 @@ export default function GroupShow({ group }: PageProps) {
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <Users className="h-5 w-5" />
-                                Members ({group.users.length})
+                                {t('Members', 'Members')} ({group.users.length})
                             </CardTitle>
                         </CardHeader>
                         <CardContent>
@@ -259,7 +259,7 @@ export default function GroupShow({ group }: PageProps) {
                                                     )}
                                                 </div>
                                                 <p className="text-xs text-muted-foreground">
-                                                    Joined {new Date(user.joined_at).toLocaleDateString()}
+                                                    {t('Joined', 'Joined')} {new Date(user.joined_at).toLocaleDateString()}
                                                 </p>
                                             </div>
                                         </div>
@@ -270,8 +270,8 @@ export default function GroupShow({ group }: PageProps) {
                                                     onChange={(e) => handleChangeRole(user.id, e.target.value)}
                                                     className="text-xs border rounded px-2 py-1 bg-background"
                                                 >
-                                                    <option value="member">Member</option>
-                                                    <option value="admin">Admin</option>
+                                                    <option value="member">{t('Member', 'Member')}</option>
+                                                    <option value="admin">{t('Admin', 'Admin')}</option>
                                                 </select>
                                                 <Button
                                                     size="sm"

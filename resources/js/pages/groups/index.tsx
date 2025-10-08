@@ -31,7 +31,7 @@ export default function GroupsIndex({ groups }: PageProps) {
     const [copiedItems, setCopiedItems] = useState<Record<string, boolean>>({});
 
     const breadcrumbs: BreadcrumbItem[] = [
-        { title: 'Groups', href: '/groups' }
+        { title: t('Groups', 'Groups'), href: '/groups' }
     ];
 
     const copyToClipboard = async (text: string, type: string, groupId: number) => {
@@ -47,20 +47,20 @@ export default function GroupsIndex({ groups }: PageProps) {
     };
 
     const handleDeleteGroup = (groupId: number) => {
-        if (confirm('Are you sure you want to delete this group? This action cannot be undone.')) {
+        if (confirm(t('Are you sure you want to delete this group? This action cannot be undone.', 'Are you sure you want to delete this group? This action cannot be undone.'))) {
             router.delete(`/groups/${groupId}`);
         }
     };
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="My Groups" />
+            <Head title={t('My Groups', 'My Groups')} />
             <div className="p-3 space-y-6">
                 {/* Page Header */}
                 <div className="space-y-2">
-                    <h1 className="text-2xl font-bold">My Groups</h1>
+                    <h1 className="text-2xl font-bold">{t('My Groups', 'My Groups')}</h1>
                     <p className="text-muted-foreground">
-                        Manage your lunch planning groups
+                        {t('Manage your lunch planning groups', 'Manage your lunch planning groups')}
                     </p>
                 </div>
 
@@ -69,7 +69,7 @@ export default function GroupsIndex({ groups }: PageProps) {
                     <Button asChild>
                         <Link href="/groups/create">
                             <Plus className="h-4 w-4 mr-2" />
-                            Create Group
+                            {t('Create Group', 'Create Group')}
                         </Link>
                     </Button>
                 </div>
@@ -80,15 +80,15 @@ export default function GroupsIndex({ groups }: PageProps) {
                             <div className="text-center space-y-4">
                                 <Users className="h-12 w-12 mx-auto text-muted-foreground" />
                                 <div>
-                                    <h3 className="text-lg font-semibold">No groups yet</h3>
+                                    <h3 className="text-lg font-semibold">{t('No groups yet', 'No groups yet')}</h3>
                                     <p className="text-muted-foreground">
-                                        Create your first group to start planning lunches with your team or class.
+                                        {t('Create your first group to start planning lunches with your team or class.', 'Create your first group to start planning lunches with your team or class.')}
                                     </p>
                                 </div>
                                 <Button asChild>
                                     <Link href="/groups/create">
                                         <Plus className="h-4 w-4 mr-2" />
-                                        Create Your First Group
+                                        {t('Create Your First Group', 'Create Your First Group')}
                                     </Link>
                                 </Button>
                             </div>
@@ -111,12 +111,12 @@ export default function GroupsIndex({ groups }: PageProps) {
                                         <div className="flex gap-1">
                                             {group.is_admin && (
                                                 <Badge variant="secondary" className="text-xs">
-                                                    Admin
+                                                    {t('Admin', 'Admin')}
                                                 </Badge>
                                             )}
                                             {group.is_creator && (
                                                 <Badge variant="outline" className="text-xs">
-                                                    Creator
+                                                    {t('Creator', 'Creator')}
                                                 </Badge>
                                             )}
                                         </div>
@@ -126,13 +126,13 @@ export default function GroupsIndex({ groups }: PageProps) {
                                     {/* Member Count */}
                                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                         <Users className="h-4 w-4" />
-                                        <span>{group.member_count} member{group.member_count !== 1 ? 's' : ''}</span>
+                                        <span>{group.member_count} {group.member_count !== 1 ? t('members', 'members') : t('member', 'member')}</span>
                                     </div>
 
                                     {/* Group Code */}
                                     <div className="space-y-3">
                                         <div className="flex items-center justify-between">
-                                            <span className="text-sm font-medium">Group Code:</span>
+                                            <span className="text-sm font-medium">{t('Group Code', 'Group Code')}:</span>
                                             <div className="flex items-center gap-2">
                                                 <code className="bg-muted px-2 py-1 rounded text-sm font-mono">
                                                     {group.code}
@@ -146,14 +146,14 @@ export default function GroupsIndex({ groups }: PageProps) {
                                                     <Copy className="h-3 w-3" />
                                                 </Button>
                                                 {copiedItems[`code-${group.id}`] && (
-                                                    <span className="text-xs text-green-600">Copied!</span>
+                                                    <span className="text-xs text-green-600">{t('Copied!', 'Copied!')}</span>
                                                 )}
                                             </div>
                                         </div>
 
                                         {/* Invite Link */}
                                         <div className="flex items-center justify-between">
-                                            <span className="text-sm font-medium">Invite Link:</span>
+                                            <span className="text-sm font-medium">{t('Invite Link', 'Invite Link')}:</span>
                                             <div className="flex items-center gap-2">
                                                 <Button
                                                     size="sm"
@@ -162,10 +162,10 @@ export default function GroupsIndex({ groups }: PageProps) {
                                                     className="h-6 px-2 text-xs"
                                                 >
                                                     <ExternalLink className="h-3 w-3 mr-1" />
-                                                    Copy
+                                                    {t('Copy', 'Copy')}
                                                 </Button>
                                                 {copiedItems[`link-${group.id}`] && (
-                                                    <span className="text-xs text-green-600">Copied!</span>
+                                                    <span className="text-xs text-green-600">{t('Copied!', 'Copied!')}</span>
                                                 )}
                                             </div>
                                         </div>
@@ -175,7 +175,7 @@ export default function GroupsIndex({ groups }: PageProps) {
                                     <div className="flex gap-2 pt-2">
                                         <Button asChild size="sm" className="flex-1">
                                             <Link href={`/week-status?group=${group.id}`}>
-                                                View Week Status
+                                                {t('View Week Status', 'View Week Status')}
                                             </Link>
                                         </Button>
                                         <Button asChild size="sm" variant="outline">
@@ -203,9 +203,9 @@ export default function GroupsIndex({ groups }: PageProps) {
                 {/* Join Group Section */}
                 <Card>
                     <CardHeader>
-                        <CardTitle>Join a Group</CardTitle>
+                        <CardTitle>{t('Join a Group', 'Join a Group')}</CardTitle>
                         <CardDescription>
-                            Have a group code? Enter it below to join an existing group.
+                            {t('Have a group code? Enter it below to join an existing group.', 'Have a group code? Enter it below to join an existing group.')}
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -223,12 +223,12 @@ export default function GroupsIndex({ groups }: PageProps) {
                             <input
                                 name="code"
                                 type="text"
-                                placeholder="Enter group code (e.g., ABC123)"
+                                placeholder={t('Enter group code (e.g., ABC123)', 'Enter group code (e.g., ABC123)')}
                                 className="flex-1 px-3 py-2 border border-input bg-background rounded-md text-sm"
                                 maxLength={6}
                                 style={{ textTransform: 'uppercase' }}
                             />
-                            <Button type="submit">Join Group</Button>
+                            <Button type="submit">{t('Join Group', 'Join Group')}</Button>
                         </form>
                     </CardContent>
                 </Card>

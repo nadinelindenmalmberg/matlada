@@ -130,6 +130,11 @@
     --sidebar-ring: oklch(0.439 0 0);
 }
 
+input[type="time"]::-webkit-calendar-picker-indicator {
+    background: none;
+    display: none;
+}
+
 @layer base {
     * {
         @apply border-border;

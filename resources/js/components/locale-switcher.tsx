@@ -2,6 +2,7 @@ import { router } from '@inertiajs/react'
 import { useState } from 'react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Globe } from 'lucide-react'
+import { useI18n } from '@/lib/i18n'
 
 interface LocaleSwitcherProps {
     label?: string
@@ -11,6 +12,7 @@ interface LocaleSwitcherProps {
 export function LocaleSwitcher({ label, iconOnly = false }: LocaleSwitcherProps) {
     const current = (typeof document !== 'undefined' ? document.documentElement.lang : 'en') || 'en'
     const [value, setValue] = useState<string>(current)
+    const { t } = useI18n()
 
     const submit = (locale: string): void => {
         router.post('/locale', { locale }, { preserveScroll: true, preserveState: true })
@@ -33,12 +35,12 @@ export function LocaleSwitcher({ label, iconOnly = false }: LocaleSwitcherProps)
                             : 'h-8 text-[#1b1b18] dark:text-[#EDEDEC]'
                     }
                     hideIndicator={iconOnly}
-                    aria-label="Change language"
+                    aria-label={t('Change language', 'Change language')}
                 >
                     {iconOnly ? (
                         <Globe className="h-5 w-5 text-current" />
                     ) : (
-                        <SelectValue placeholder="Select language" />
+                        <SelectValue placeholder={t('Select language', 'Select language')} />
                     )}
                 </SelectTrigger>
                 <SelectContent>
