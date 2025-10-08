@@ -42,5 +42,6 @@ RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
 # Run build-safe optimization commands
 RUN php artisan octane:install --server=frankenphp && \
     php artisan config:cache && \
+    php artisan migrate --no-interaction --force && \
     php artisan route:cache && \
     php artisan view:cache
