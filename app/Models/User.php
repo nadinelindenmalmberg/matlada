@@ -108,7 +108,121 @@ class User extends Authenticatable
             return $avatar;
         }
 
-        // Use the configured public disk URL to generate a correct absolute URL
-        return Storage::disk('public')->url($avatar);
+        // Use S3 disk for avatars if configured, otherwise fall back to public disk
+        $disk = config('filesystems.default') === 's3' ? 's3' : 'public';
+
+        // For S3, generate signed URLs for security
+        if ($disk === 's3') {
+            $expiration = now()->addHours((int) config('filesystems.s3_signed_url_expiration', 24));
+
+            // Ensure browsers recognize the response as an image to avoid OpaqueResponseBlocking
+            $extension = strtolower(pathinfo($avatar, PATHINFO_EXTENSION));
+            $extensionToMime = [
+                'jpg' => 'image/jpeg',
+                'jpeg' => 'image/jpeg',
+                'png' => 'image/png',
+                'gif' => 'image/gif',
+                'webp' => 'image/webp',
+                'bmp' => 'image/bmp',
+                'svg' => 'image/svg+xml',
+            ];
+            $mime = $extensionToMime[$extension] ?? 'application/octet-stream';
+
+            return Storage::disk('s3')->temporaryUrl($avatar, $expiration, [
+                'ResponseContentType' => $mime,
+                'ResponseContentDisposition' => 'inline; filename="' . basename($avatar) . '"',
+                'ResponseCacheControl' => 'public, max-age=31536000, immutable',
+            ]);
+        }
+
+        return Storage::disk($disk)->url($avatar);
+    }
+
+    /**
+     * Upload and store a new avatar for the user.
+     */
+    public function uploadAvatar($file): string
+    {
+        // Delete old avatar if exists
+        if ($this->avatar) {
+            $this->deleteAvatar();
+        }
+
+        $disk = 's3';
+        $key = $this->id . '_' . time() . '.' . $file->getClientOriginalExtension();
+
+        if ($disk === 's3') {
+            try {
+                // Build a one-off S3 disk that disables SSL verification (local-only fix)
+                $s3Config = config('filesystems.disks.s3');
+                $s3Config['throw'] = true;
+                // Guzzle client option
+                $s3Config['http'] = ['verify' => false];
+
+                $s3Disk = \Illuminate\Support\Facades\Storage::build($s3Config);
+
+                $storedPath = $s3Disk->putFileAs(
+                    'avatars',
+                    $file,
+                    $key,
+                    [
+                        'visibility' => 'private',
+                        'ContentType' => $file->getMimeType(),
+                        'CacheControl' => 'public, max-age=31536000, immutable',
+                    ]
+                );
+
+                if ($storedPath === false) {
+                    logger()->error('S3 putFileAs failed for avatar upload', [
+                        'user_id' => $this->id,
+                        'key' => $key,
+                    ]);
+                    throw new \RuntimeException('Failed to upload avatar to S3');
+                }
+            } catch (\Throwable $e) {
+                logger()->error('S3 avatar upload exception', [
+                    'user_id' => $this->id,
+                    'key' => $key,
+                    'message' => $e->getMessage(),
+                ]);
+                throw $e;
+            }
+
+            $this->update(['avatar' => $storedPath]);
+        }
+
+        return $storedPath;
+    }
+
+    /**
+     * Delete the user's current avatar.
+     */
+    public function deleteAvatar(): bool
+    {
+        if (!$this->avatar) {
+            return true;
+        }
+
+        $diskName = 's3';
+        $disk = Storage::disk('s3');
+
+        if ($diskName === 's3') {
+            // S3 delete is idempotent; avoid exists() which may fail due to permissions/policy
+            try {
+                $path = $this->avatar;
+                // If an absolute URL is stored, derive the key from the URL path
+                if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+                    $parsed = parse_url($path);
+                    $path = isset($parsed['path']) ? ltrim($parsed['path'], '/') : $path;
+                }
+                $disk->delete($path);
+            } catch (\Throwable $e) {
+                // Ignore missing object or permission-related existence checks
+            }
+        }
+
+        $this->update(['avatar' => null]);
+
+        return true;
     }
 }

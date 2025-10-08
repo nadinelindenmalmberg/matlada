@@ -18,6 +18,9 @@ class UserDayStatus extends Model
         'status',
         'arrival_time',
         'location',
+        'start_location',
+        'eat_location',
+        'note',
     ];
 
     protected $casts = [

@@ -3,6 +3,7 @@
 use App\Http\Controllers\AlignmentController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\PollController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\WeekStatusController;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -26,6 +27,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('week-status', [WeekStatusController::class, 'upsert'])->name('week-status.upsert');
     Route::delete('week-status', [WeekStatusController::class, 'destroy'])->name('week-status.destroy');
     Route::get('alignment', [AlignmentController::class, 'index'])->name('alignment.index');
+    
+    // Profile routes moved to settings.php
 
     // Group routes
     Route::get('groups', [GroupController::class, 'index'])->name('groups.index');

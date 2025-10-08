@@ -48,7 +48,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                                     <Label>{t('Profile picture')}</Label>
                                     <div className="flex items-center gap-3">
                                         <Avatar className="h-12 w-12 overflow-hidden rounded-full">
-                                            <AvatarImage src={auth.user.avatar ? (auth.user.avatar.startsWith('http') ? auth.user.avatar : `/storage/${auth.user.avatar}`) : undefined} alt={auth.user.name} />
+                                            <AvatarImage src={auth.user.avatar_url} alt={auth.user.name} />
                                             <AvatarFallback className="rounded-full bg-neutral-200 text-black dark:bg-neutral-700 dark:text-white">
                                                 {auth.user.name.split(' ').map((n: string) => n.charAt(0)).join('').slice(0, 2).toUpperCase()}
                                             </AvatarFallback>
