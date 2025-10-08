@@ -19,6 +19,7 @@ import { BreadcrumbItem } from '@/types';
 import { dashboard } from '@/routes';
 import { useI18n } from '@/lib/i18n';
 import { useInitials } from '@/hooks/use-initials';
+import { GroupSelector } from '@/components/group-selector';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 // Removed dropdown menu; using inline action buttons instead
 
@@ -45,10 +46,28 @@ type CopiedData = {
     note: string | null;
 };
 
+type Group = {
+    id: number;
+    name: string;
+    description?: string;
+    code: string;
+    invite_link: string;
+    is_admin: boolean;
+    is_creator: boolean;
+    invite_url: string;
+    invite_link_url: string;
+};
+
 type PageProps = {
     week: string;
+    group?: {
+        id: number;
+        name: string;
+        code: string;
+    };
+    groups: Group[];
     activeWeekday: number;
-    users: Array<{ id: number; name: string; email: string }>;
+    users: Array<{ id: number; name: string; email: string; avatar?: string }>;
     statuses: Record<string, Array<UserDayRow>>;
     canEditUserId: number;
 };
@@ -147,7 +166,7 @@ function isSameLocalDate(a: Date, b: Date): boolean {
 }
 
 export default function WeekStatusIndex() {
-    const { week, users, statuses, canEditUserId, activeWeekday } = usePage<PageProps>().props;
+    const { week, group, groups, users, statuses, canEditUserId, activeWeekday } = usePage<PageProps>().props;
     // Removed global processing state for seamless UX
     const [draftLocations, setDraftLocations] = React.useState<Record<string, string>>({});
     const [draftStartLocations, setDraftStartLocations] = React.useState<Record<string, string>>({});
@@ -191,9 +210,13 @@ export default function WeekStatusIndex() {
                 status,
                 arrival_time,
                 location,
+<<<<<<< HEAD
+                group_id: group?.id || null,
+=======
                 start_location: finalStart,
                 eat_location: finalEat,
                 note: finalNote,
+>>>>>>> addb923b712d880499eefbf843867793d69d9107
             },
             {
                 preserveScroll: true,
@@ -455,9 +478,19 @@ export default function WeekStatusIndex() {
 
             <Head title={`${t('Week', 'Week')} ${displayWeek}`} />
             <div className="p-3">
+                {/* Group Selector */}
+                <div className="mb-6">
+                    <GroupSelector groups={groups} currentGroupId={group?.id} />
+                </div>
+                
                 <div className="flex items-center justify-between mb-3">
                     <Badge className="text-sm font-medium flex items-center gap-2">
                         <span>{t('Week', 'Week')} {displayWeek}</span>
+                        {group && (
+                            <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                                {group.name}
+                            </span>
+                        )}
                     </Badge>
                 </div>
                 {/* Mobile day navigation */}

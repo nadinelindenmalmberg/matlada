@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AlignmentController;
+use App\Http\Controllers\GroupController;
 use App\Http\Controllers\PollController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\WeekStatusController;
@@ -28,6 +29,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('alignment', [AlignmentController::class, 'index'])->name('alignment.index');
     
     // Profile routes moved to settings.php
+
+    // Group routes
+    Route::get('groups', [GroupController::class, 'index'])->name('groups.index');
+    Route::get('groups/create', [GroupController::class, 'create'])->name('groups.create');
+    Route::post('groups', [GroupController::class, 'store'])->name('groups.store');
+    Route::get('groups/{group}', [GroupController::class, 'show'])->name('groups.show');
+    Route::post('groups/join', [GroupController::class, 'join'])->name('groups.join');
+    Route::get('groups/join/{link}', [GroupController::class, 'joinByLink'])->name('groups.join-link');
+    Route::delete('groups/{group}/leave', [GroupController::class, 'leave'])->name('groups.leave');
+    Route::delete('groups/{group}/members', [GroupController::class, 'removeMember'])->name('groups.remove-member');
+    Route::patch('groups/{group}/members/role', [GroupController::class, 'updateMemberRole'])->name('groups.update-member-role');
+    Route::delete('groups/{group}', [GroupController::class, 'destroy'])->name('groups.destroy');
 
     // Route::get('poll', [PollController::class, 'index'])->name('poll.index');
     // Route::post('poll/vote', [PollController::class, 'vote'])->name('poll.vote');

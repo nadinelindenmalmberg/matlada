@@ -19,8 +19,9 @@ services:
       DB_PASSWORD: ${DB_PASSWORD:-password}
     depends_on:
       db:
-        condition: service_healthy
+        condition: service_healthy # Wait for the database to be ready
     networks:
+      - app-network
       - dokploy-network
     ports:
       - '8000:8000'
@@ -42,11 +43,14 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - dokploy-network
+      - app-network
 
 volumes:
   db-data:
 
+# Networks
 networks:
+  app-network:
+    driver: bridge
   dokploy-network:
     driver: bridge
