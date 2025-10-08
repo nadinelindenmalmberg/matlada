@@ -210,13 +210,10 @@ export default function WeekStatusIndex() {
                 status,
                 arrival_time,
                 location,
-<<<<<<< HEAD
                 group_id: group?.id || null,
-=======
                 start_location: finalStart,
                 eat_location: finalEat,
                 note: finalNote,
->>>>>>> addb923b712d880499eefbf843867793d69d9107
             },
             {
                 preserveScroll: true,
@@ -480,7 +477,7 @@ export default function WeekStatusIndex() {
             <div className="p-3">
                 {/* Group Selector */}
                 <div className="mb-6">
-                    <GroupSelector groups={groups} currentGroupId={group?.id} />
+                    <GroupSelector groups={groups as any} currentGroupId={group?.id} />
                 </div>
                 
                 <div className="flex items-center justify-between mb-3">
