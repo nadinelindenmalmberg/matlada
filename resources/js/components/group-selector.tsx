@@ -84,7 +84,7 @@ export function GroupSelector({ groups, currentGroupId }: GroupSelectorProps) {
                         onClick={() => handleGroupChange('all')}
                     >
                         <Users className="h-3 w-3 mr-1" />
-                        {t('All Users', 'All Users')}
+                        {t('All Groups', 'All Groups')}
                     </Badge>
 
                     {/* Group Badges */}

@@ -20,11 +20,34 @@ class Group extends Model
         'invite_link',
         'created_by',
         'is_active',
+        'privacy',
+        'category',
+        'tags',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
     ];
+
+    public function isPublic(): bool
+    {
+        return $this->privacy === 'public';
+    }
+
+    public function isPrivate(): bool
+    {
+        return $this->privacy === 'private';
+    }
+
+    public function getTagsArray(): array
+    {
+        return $this->tags ? explode(',', $this->tags) : [];
+    }
+
+    public function setTagsArray(array $tags): void
+    {
+        $this->tags = implode(',', $tags);
+    }
 
     protected static function boot()
     {
