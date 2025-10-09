@@ -842,6 +842,7 @@ export default function WeekStatusIndex() {
     }
 
     function clearStatus(weekday: number) {
+        console.log('clearStatus called for weekday:', weekday, 'group:', group);
         const key = getCellKey(canEditUserId, weekday);
         if (locationDebounceRef.current[key]) {
             clearTimeout(locationDebounceRef.current[key]);
@@ -880,6 +881,11 @@ export default function WeekStatusIndex() {
             return next;
         });
 
+        console.log('Making DELETE request with data:', { 
+            iso_week: week, 
+            weekday,
+            group_id: group?.id || null
+        });
         router.delete('/week-status', {
             data: { 
                 iso_week: week, 
@@ -889,10 +895,12 @@ export default function WeekStatusIndex() {
             preserveScroll: true,
             preserveState: false,
             onSuccess: () => {
+                console.log('Clear request successful');
                 showSaveConfirmation(key);
                 toast.success(t('Cleared', 'Cleared'));
             },
-            onError: () => {
+            onError: (errors) => {
+                console.log('Clear request failed:', errors);
                 // Rollback optimistic clear on error
                 setOptimisticStatuses(prev => {
                     const next = { ...prev };
