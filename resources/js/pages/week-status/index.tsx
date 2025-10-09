@@ -881,7 +881,11 @@ export default function WeekStatusIndex() {
         });
 
         router.delete('/week-status', {
-            data: { iso_week: week, weekday },
+            data: { 
+                iso_week: week, 
+                weekday,
+                group_id: group?.id || null
+            },
             preserveScroll: true,
             preserveState: false,
             onSuccess: () => {
