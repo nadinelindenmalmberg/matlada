@@ -295,48 +295,7 @@ function WeekStatusCell({
         <div className="relative w-full group">
             {/* Status and Plan Section */}
             <div className="flex flex-col gap-1.5 p-2 bg-muted/30 rounded-lg border relative">
-                {/* Actions - Move above status when inputs wrap */}
-                {isWrapped && (
-                    <div className="flex items-center justify-end gap-2 h-9">
-                        {/* Save confirmation indicator */}
-                        {isSaving && (
-                            <div className="flex items-center gap-1 text-green-600 dark:text-green-400 text-xs">
-                                <Icon iconNode={CheckIcon} className="size-3" />
-                                <span>{t('Saved', 'Saved')}</span>
-                            </div>
-                        )}
-                        {/* Typing indicator */}
-                        {isTyping && !isSaving && (
-                            <div className="size-2 bg-blue-600 dark:bg-blue-400 rounded-full animate-pulse" />
-                        )}
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="size-7" aria-label={t('Actions', 'Actions')}>
-                                    <Icon iconNode={MoreHorizontalIcon} className="size-3.5" />
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-48">
-                                <DropdownMenuItem onSelect={() => copyDayData(d.value)}>
-                                    <Icon iconNode={CopyIcon} className="size-4" />
-                                    {t('Copy day', 'Copy day')}
-                                </DropdownMenuItem>
-                                <DropdownMenuItem disabled={!copiedData} onSelect={() => pasteDayData(d.value)}>
-                                    <Icon iconNode={PasteIcon} className="size-4" />
-                                    {t('Paste day', 'Paste day')}
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem onSelect={() => setForAllDays(d.value)}>
-                                    <Icon iconNode={RepeatIcon} className="size-4" />
-                                    {t('Set for coming days', 'Set for coming days')}
-                                </DropdownMenuItem>
-                                <DropdownMenuItem variant="destructive" onSelect={() => clearStatus(d.value)}>
-                                    <Icon iconNode={TrashIcon} className="size-4" />
-                                    {t('Clear', 'Clear')}
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    </div>
-                )}
+                
 
                 {/* Status and Actions Row - Side by side when space allows */}
                 <div className="flex items-center gap-2 flex-wrap">
@@ -344,7 +303,7 @@ function WeekStatusCell({
                     <div className="flex items-center gap-2 flex-1 min-w-0">
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <InputGroupButton variant="outline" className="!pr-2 h-8 min-w-32 justify-start dark:bg-foreground/1 text-xs" aria-label={t('Status', 'Status')}>
+                                <InputGroupButton variant="outline" className="!pr-2 h-8 min-w-32 justify-start dark:bg-foreground/1 text-xs [--radius:0.95rem]" aria-label={t('Status', 'Status')}>
                                     <span className={`h-3 w-3 rounded-full ${getStatusDotClass(value)}`} />
                                     <span className="ml-2 font-medium truncate">
                                         {value === 'Lunchbox' ? t('Lunchbox', 'Lunchbox') : value === 'Buying' ? t('Buying', 'Buying') : value === 'Home' ? t('Home', 'Home') : value === 'Away' ? t("Not with ya'll", "Not with ya'll") : t('Select status', 'Select status')}
@@ -352,7 +311,7 @@ function WeekStatusCell({
                                     <Icon iconNode={ChevronDownIcon} className="size-3 ml-auto opacity-60" />
                                 </InputGroupButton>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="start" className="w-48">
+                            <DropdownMenuContent align="start" className="[--radius:0.95rem]  text-xs">
                                 <DropdownMenuItem onSelect={() => {
                                     const newStatus: StatusValue = 'Lunchbox';
                                     const isClearing = false;
@@ -413,53 +372,50 @@ function WeekStatusCell({
                         </DropdownMenu>
                     </div>
 
-                    {/* Actions - Side by side when space allows, wrap when needed */}
-                    {!isWrapped && (
-                        <div className="flex items-center gap-2 flex-shrink-0">
-                            {/* Save confirmation indicator */}
-                            {isSaving && (
-                                <div className="flex items-center gap-1 text-green-600 dark:text-green-400 text-xs">
-                                    <Icon iconNode={CheckIcon} className="size-3" />
-                                    <span>{t('Saved', 'Saved')}</span>
-                                </div>
-                            )}
-                            {/* Typing indicator */}
-                            {isTyping && !isSaving && (
-                                <div className="size-2 bg-blue-600 dark:bg-blue-400 rounded-full animate-pulse" />
-                            )}
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="size-7" aria-label={t('Actions', 'Actions')}>
-                                        <Icon iconNode={MoreHorizontalIcon} className="size-3.5" />
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="w-48">
-                                    <DropdownMenuItem onSelect={() => copyDayData(d.value)}>
-                                        <Icon iconNode={CopyIcon} className="size-4" />
-                                        {t('Copy day', 'Copy day')}
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem disabled={!copiedData} onSelect={() => pasteDayData(d.value)}>
-                                        <Icon iconNode={PasteIcon} className="size-4" />
-                                        {t('Paste day', 'Paste day')}
-                                    </DropdownMenuItem>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem onSelect={() => setForAllDays(d.value)}>
-                                        <Icon iconNode={RepeatIcon} className="size-4" />
-                                        {t('Set for coming days', 'Set for coming days')}
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem variant="destructive" onSelect={() => clearStatus(d.value)}>
-                                        <Icon iconNode={TrashIcon} className="size-4" />
-                                        {t('Clear', 'Clear')}
-                                    </DropdownMenuItem>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                        </div>
-                    )}
+                    {/* Actions - inline with status dropdown */}
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                        {/* Save confirmation indicator */}
+                        {isSaving && (
+                            <div className="flex items-center gap-1 text-green-600 dark:text-green-400 text-xs">
+                                <Icon iconNode={CheckIcon} className="size-3" />
+                            </div>
+                        )}
+                        {/* Typing indicator */}
+                        {isTyping && !isSaving && (
+                            <div className="size-2 bg-blue-600 dark:bg-blue-400 rounded-full animate-pulse" />
+                        )}
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon" className="size-7" aria-label={t('Actions', 'Actions')}>
+                                    <Icon iconNode={MoreHorizontalIcon} className="size-3.5" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-48">
+                                <DropdownMenuItem onSelect={() => copyDayData(d.value)}>
+                                    <Icon iconNode={CopyIcon} className="size-4" />
+                                    {t('Copy day', 'Copy day')}
+                                </DropdownMenuItem>
+                                <DropdownMenuItem disabled={!copiedData} onSelect={() => pasteDayData(d.value)}>
+                                    <Icon iconNode={PasteIcon} className="size-4" />
+                                    {t('Paste day', 'Paste day')}
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem onSelect={() => setForAllDays(d.value)}>
+                                    <Icon iconNode={RepeatIcon} className="size-4" />
+                                    {t('Set for coming days', 'Set for coming days')}
+                                </DropdownMenuItem>
+                                <DropdownMenuItem variant="destructive" onSelect={() => clearStatus(d.value)}>
+                                    <Icon iconNode={TrashIcon} className="size-4" />
+                                    {t('Clear', 'Clear')}
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
                 </div>
 
                 {/* Time and Location - Connected Fields */}
                 <div ref={containerRef} className="flex gap-1 flex-wrap">
-                    <InputGroup ref={timeInputRef} className="w-[6rem] flex-shrink-0">
+                    <InputGroup ref={timeInputRef} className="w-[6rem] flex-shrink-0 h-8">
                         <InputGroupAddon align="inline-start" aria-hidden="true">
                             <Icon iconNode={ClockIcon} className="size-3.5 text-muted-foreground" />
                         </InputGroupAddon>
@@ -475,7 +431,7 @@ function WeekStatusCell({
                             onChange={(e) => submitUpdate(d.value, value, (e.target as HTMLInputElement).value || null, locationValue || null)}
                         />
                     </InputGroup>
-                    <InputGroup ref={locationInputRef} className="min-w-[100px] flex-1">
+                    <InputGroup ref={locationInputRef} className="min-w-[100px] flex-1 h-8">
                         <InputGroupAddon align="inline-start" aria-hidden="true">
                             <Icon iconNode={MapPinIcon} className="size-3.5 text-muted-foreground" />
                         </InputGroupAddon>
@@ -512,7 +468,7 @@ function WeekStatusCell({
                 </div>
 
                 {/* Eat Location */}
-                <InputGroup>
+                <InputGroup className="h-8">
                     <InputGroupAddon align="inline-start" aria-hidden="true">
                         <Icon iconNode={UtensilsIcon} className="size-3.5 text-muted-foreground" />
                     </InputGroupAddon>
@@ -536,7 +492,7 @@ function WeekStatusCell({
                 </InputGroup>
 
                 {/* Notes */}
-                <InputGroup aria-labelledby={`notes-label-${cellKey}`}>
+                <InputGroup aria-labelledby={`notes-label-${cellKey}`} className="h-8">
                     <span id={`notes-label-${cellKey}`} className="sr-only">{t('Notes', 'Notes')}</span>
                     <InputGroupAddon align="inline-start" aria-hidden="true">
                         <Icon iconNode={StickyNoteIcon} className="size-3.5 text-muted-foreground" />
@@ -1011,7 +967,14 @@ export default function WeekStatusIndex() {
                 locationText,
                 timeText,
             ];
-            // Eat location intentionally omitted from natural language for others view
+            // Include eat location: Lunchbox => "eating in"
+            if (eatLocation) {
+                parts.push(
+                    <>
+                        {t("and eating in", "and eating in")} <span className="font-bold">{eatLocation}</span>
+                    </>
+                );
+            }
             if (note) {
                 parts.push(<span className="italic text-muted-foreground">— {note}</span>);
             }
@@ -1034,7 +997,14 @@ export default function WeekStatusIndex() {
                 locationText,
                 timeText,
             ];
-            // Eat location intentionally omitted from natural language for others view
+            // Include eat location: Buying => "eating at"
+            if (eatLocation) {
+                parts.push(
+                    <>
+                        {t("and eating at", "and eating at")} <span className="font-bold">{eatLocation}</span>
+                    </>
+                );
+            }
             if (note) {
                 parts.push(<span className="italic text-muted-foreground">— {note}</span>);
             }
@@ -1243,28 +1213,10 @@ export default function WeekStatusIndex() {
                                                                     </div>
                                                                     <div className="space-y-1.5">
                                                                         <Badge variant={getStatusBadgeVariant(value)} className={`${getStatusBadgeClass(value)} ${getBadgeSizeClass()} font-semibold w-full justify-start`}>
-                                                                            <span className="inline-flex items-center gap-1.5">
-                                                                                <Icon
-                                                                                    iconNode={
-                                                                                        value === 'Lunchbox'
-                                                                                            ? UtensilsIcon
-                                                                                            : value === 'Buying'
-                                                                                                ? ShoppingCartIcon
-                                                                                                : value === 'Home'
-                                                                                                    ? HomeIcon
-                                                                                                    : UsersIcon
-                                                                                    }
-                                                                                    className="size-3.5"
-                                                                                />
+                                                                            <span>
                                                                                 {value === 'Lunchbox' ? t('Lunchbox', 'Lunchbox') : value === 'Buying' ? t('Buying', 'Buying') : value === 'Home' ? t('Home', 'Home') : t('Not with ya\'ll', 'Not with ya\'ll')}
                                                                             </span>
-                                                                            {eatLocationValue ? (
-                                                                                <span className="ml-2 inline-flex items-center gap-1 font-normal">
-                                                                                    <span className="opacity-60">—</span>
-                                                                                    <Icon iconNode={MapPinIcon} className="size-3.5" />
-                                                                                    <span className="truncate max-w-[8rem]">{eatLocationValue}</span>
-                                                                                </span>
-                                                                            ) : null}
+                                                                            {/* Eat location removed from badge for others view */}
                                                                         </Badge>
                                                                         <div className="text-xs text-foreground leading-relaxed text-left">
                                                                             {generateNaturalStatusText(value, timeValue || null, locationValue || null, eatLocationValue || null, noteValue || null, t)}
