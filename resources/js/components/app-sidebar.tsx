@@ -33,7 +33,12 @@ const footerNavItems: NavItem[] = [
         title: 'Repository',
         href: 'https://github.com/filipsjolanderr/matlada',
         icon: Github,
-    }
+    },
+    {
+        title: 'Made by IT21\'s best',
+        href: 'https://github.com/filipsjolanderr/matlada',
+        icon: Heart,
+    },
 ];
 
 export function AppSidebar() {
@@ -59,6 +64,7 @@ export function AppSidebar() {
             <SidebarFooter>
                 <NavFooter items={[
                     { ...footerNavItems[0], title: t('Repository') },
+                    { ...footerNavItems[1], title: t('Made by Filip Sjölander') },
                 ]} className="mt-auto" />
                 <NavUser />
             </SidebarFooter>

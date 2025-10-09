@@ -690,7 +690,7 @@ export default function WeekStatusIndex() {
             // Set typing state
             setTypingStates(prev => ({ ...prev, [key]: true }));
 
-            locationDebounceRef.current[key] = setTimeout(() => {
+        locationDebounceRef.current[key] = setTimeout(() => {
                 // Clear typing state before submitting
                 setTypingStates(prev => {
                     const next = { ...prev };
@@ -722,14 +722,14 @@ export default function WeekStatusIndex() {
             // Set typing state
             setTypingStates(prev => ({ ...prev, [key]: true }));
 
-            eatLocationDebounceRef.current[key] = setTimeout(() => {
+        eatLocationDebounceRef.current[key] = setTimeout(() => {
                 // Clear typing state before submitting
                 setTypingStates(prev => {
                     const next = { ...prev };
                     delete next[key];
                     return next;
                 });
-                postPartialUpdate(weekday, { eat_location: draftEatLocation }, status, timeValue, location);
+            postPartialUpdate(weekday, { eat_location: draftEatLocation }, status, timeValue, location);
             }, 1500); // Reduced from 2000ms to 1500ms for better UX
         } else {
             // Clear typing state if input is empty
@@ -754,14 +754,14 @@ export default function WeekStatusIndex() {
             // Set typing state
             setTypingStates(prev => ({ ...prev, [key]: true }));
 
-            noteDebounceRef.current[key] = setTimeout(() => {
+        noteDebounceRef.current[key] = setTimeout(() => {
                 // Clear typing state before submitting
                 setTypingStates(prev => {
                     const next = { ...prev };
                     delete next[key];
                     return next;
                 });
-                postPartialUpdate(weekday, { note: draftNote }, status, timeValue, location);
+            postPartialUpdate(weekday, { note: draftNote }, status, timeValue, location);
             }, 1000); // Reduced from 1200ms to 1000ms for better UX
         } else {
             // Clear typing state if input is empty
@@ -881,7 +881,11 @@ export default function WeekStatusIndex() {
         });
 
         router.delete('/week-status', {
-            data: { iso_week: week, weekday },
+            data: { 
+                iso_week: week, 
+                weekday,
+                group_id: group?.id || null
+            },
             preserveScroll: true,
             preserveState: false,
             onSuccess: () => {
@@ -1056,7 +1060,7 @@ export default function WeekStatusIndex() {
 
             <Head title={`${t('Week', 'Week')} ${displayWeek}`} />
             <div className="p-3">
-
+                
                 <div className="flex items-center justify-between mb-3">
                     <Badge className="text-sm font-medium flex items-center gap-2 bg-secondary text-secondary-foreground">
                         <span>{t('Week', 'Week')} {displayWeek}</span>
@@ -1185,33 +1189,33 @@ export default function WeekStatusIndex() {
                                                                 <div className="p-2 bg-muted/20 rounded-lg border relative">
                                                                     {/* Copy action - only show if they have data */}
                                                                     <div className="absolute top-2 right-2 opacity-0 text-white group-hover:opacity-100 transition-opacity duration-200">
-                                                                        <Tooltip delayDuration={500}>
-                                                                            <TooltipTrigger asChild>
-                                                                                <Button
-                                                                                    type="button"
-                                                                                    variant="ghost"
-                                                                                    size="icon"
+                                                                    <Tooltip delayDuration={500}>
+                                                                        <TooltipTrigger asChild>
+                                                                            <Button
+                                                                                type="button"
+                                                                                variant="ghost"
+                                                                                size="icon"
                                                                                     className="size-7 hover:bg-white/20 hover:text-white"
-                                                                                    aria-label={t('Copy day', 'Copy day')}
-                                                                                    onClick={() => {
-                                                                                        const data: CopiedData = {
-                                                                                            status: value,
-                                                                                            arrival_time: timeValue || null,
-                                                                                            location: locationValue || null,
-                                                                                            start_location: null,
-                                                                                            eat_location: null,
-                                                                                            note: null,
-                                                                                        };
-                                                                                        setCopiedData(data);
-                                                                                        toast.info(t('Copied!', 'Copied!'));
-                                                                                    }}
-                                                                                >
+                                                                            aria-label={t('Copy day', 'Copy day')}
+                                                                            onClick={() => {
+                                                                                const data: CopiedData = {
+                                                                                    status: value,
+                                                                                    arrival_time: timeValue || null,
+                                                                                    location: locationValue || null,
+                                                                                    start_location: null,
+                                                                                    eat_location: null,
+                                                                                    note: null,
+                                                                                };
+                                                                                setCopiedData(data);
+                                                                                toast.info(t('Copied!', 'Copied!'));
+                                                                            }}
+                                                                        >
                                                                                     <Icon iconNode={CopyIcon} className="size-3.5" />
-                                                                                </Button>
-                                                                            </TooltipTrigger>
-                                                                            <TooltipContent>{t('Copy day', 'Copy day')}</TooltipContent>
-                                                                        </Tooltip>
-                                                                    </div>
+                                                                        </Button>
+                                                                    </TooltipTrigger>
+                                                                    <TooltipContent>{t('Copy day', 'Copy day')}</TooltipContent>
+                                                                </Tooltip>
+                                                            </div>
                                                                     <div className="space-y-1.5">
                                                                         <Badge variant={getStatusBadgeVariant(value)} className={`${getStatusBadgeClass(value)} ${getBadgeSizeClass()} font-semibold w-full justify-start`}>
                                                                             <span>
@@ -1238,13 +1242,13 @@ export default function WeekStatusIndex() {
                                 ))}
                             </TableBody>
                         </Table>
-                    </div>
                 </div>
-                <datalist id="default-locations">
-                    {defaultLocations.map((loc) => (
-                        <option key={loc} value={loc} />
-                    ))}
-                </datalist>
+            </div>
+            <datalist id="default-locations">
+                {defaultLocations.map((loc) => (
+                    <option key={loc} value={loc} />
+                ))}
+            </datalist>
             </div>
         </AppLayout >
     );
