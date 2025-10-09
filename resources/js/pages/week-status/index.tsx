@@ -692,6 +692,7 @@ export default function WeekStatusIndex() {
                 start_location: finalStart,
                 eat_location: finalEat,
                 note: finalNote,
+                visibility: 'group_only', // Default visibility - will be made configurable
             },
             {
                 preserveScroll: true,

@@ -56,11 +56,17 @@ class GroupController extends Controller
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:1000'],
+            'privacy' => ['nullable', 'in:private,public'],
+            'category' => ['nullable', 'in:location,interest,program,course,other'],
+            'tags' => ['nullable', 'string', 'max:500'],
         ]);
 
         $group = Group::create([
             'name' => $request->name,
             'description' => $request->description,
+            'privacy' => $request->privacy ?? 'private',
+            'category' => $request->category,
+            'tags' => $request->tags,
             'created_by' => Auth::id(),
         ]);
 

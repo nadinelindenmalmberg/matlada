@@ -64,30 +64,69 @@ class WeekStatusController extends Controller
             }
         }
 
-        // Get users based on group membership
+        // Get users and statuses based on privacy settings
         if ($group) {
+            // Group view: show only group members
             $users = $group->users()
                 ->select(['users.id', 'users.name', 'users.email', 'users.avatar'])
                 ->orderByRaw('CASE WHEN users.id = ? THEN 0 ELSE 1 END', [$currentUserId])
                 ->orderBy('users.name')
                 ->get();
+                
+            // Get statuses visible to this group
+            $statusQuery = UserDayStatus::query()
+                ->where('iso_week', $week)
+                ->where(function ($query) use ($group, $currentUserId) {
+                    $query->where('group_id', $group->id)
+                          ->orWhere(function ($subQuery) use ($currentUserId) {
+                              // Show user's own statuses regardless of visibility
+                              $subQuery->where('user_id', $currentUserId);
+                          })
+                          ->orWhere(function ($subQuery) use ($group) {
+                              // Show statuses visible to all groups from users in this group
+                              $subQuery->where('visibility', 'all_groups')
+                                      ->whereIn('user_id', $group->users()->pluck('users.id'));
+                          });
+                });
         } else {
-            // If no group specified, show all users (backward compatibility)
-            $users = User::query()
-                ->select(['id', 'name', 'email', 'avatar'])
-                ->orderByRaw('CASE WHEN id = ? THEN 0 ELSE 1 END', [$currentUserId])
-                ->orderBy('name')
-                ->get();
-        }
-
-        // Get statuses for the week and group
-        $statusQuery = UserDayStatus::query()
-            ->where('iso_week', $week);
+            // Global view: show users from all groups the current user belongs to
+            $userGroupIds = $currentUser->groups()->pluck('groups.id');
             
-        if ($group) {
-            $statusQuery->where('group_id', $group->id);
-        } else {
-            $statusQuery->whereNull('group_id');
+            if ($userGroupIds->isEmpty()) {
+                // User hasn't joined any groups yet - show all users (backward compatibility)
+                $users = User::query()
+                    ->select(['id', 'name', 'email', 'avatar'])
+                    ->orderByRaw('CASE WHEN id = ? THEN 0 ELSE 1 END', [$currentUserId])
+                    ->orderBy('name')
+                    ->get();
+                
+                // Show all statuses (backward compatibility)
+                $statusQuery = UserDayStatus::query()
+                    ->where('iso_week', $week);
+            } else {
+                // User belongs to groups - show group members
+                $users = User::query()
+                    ->whereHas('groups', function ($query) use ($userGroupIds) {
+                        $query->whereIn('groups.id', $userGroupIds);
+                    })
+                    ->select(['id', 'name', 'email', 'avatar'])
+                    ->orderByRaw('CASE WHEN id = ? THEN 0 ELSE 1 END', [$currentUserId])
+                    ->orderBy('name')
+                    ->get();
+                    
+                // Get statuses visible globally
+                $statusQuery = UserDayStatus::query()
+                    ->where('iso_week', $week)
+                    ->where(function ($query) use ($currentUserId, $userGroupIds) {
+                        $query->where('user_id', $currentUserId) // User's own statuses
+                              ->orWhere('visibility', 'all_groups') // Statuses visible to all groups
+                              ->orWhere(function ($subQuery) use ($userGroupIds) {
+                                  // Statuses from groups the user belongs to
+                                  $subQuery->whereIn('group_id', $userGroupIds)
+                                          ->where('visibility', 'group_only');
+                              });
+                    });
+            }
         }
         
         $statuses = $statusQuery->get()->groupBy('user_id');
@@ -119,6 +158,7 @@ class WeekStatusController extends Controller
             'start_location' => ['nullable', 'string', 'max:120'],
             'eat_location' => ['nullable', 'string', 'max:120'],
             'note' => ['nullable', 'string'],
+            'visibility' => ['nullable', 'in:group_only,all_groups,private'],
         ]);
 
         $userId = (int) $request->user()->id;
@@ -132,6 +172,27 @@ class WeekStatusController extends Controller
             }
         }
 
+        // Handle visibility logic
+        $visibility = $request->input('visibility', 'group_only');
+        $groupId = $request->input('group_id');
+        
+        if ($visibility === 'all_groups') {
+            // Create status for all user's groups
+            $userGroups = $request->user()->groups;
+            foreach ($userGroups as $userGroup) {
+                $this->createOrUpdateStatus($request, $userId, $userGroup->id, $visibility);
+            }
+        } else {
+            // Single group or private
+            $targetGroupId = $visibility === 'private' ? null : $groupId;
+            $this->createOrUpdateStatus($request, $userId, $targetGroupId, $visibility);
+        }
+
+        return back();
+    }
+
+    private function createOrUpdateStatus(Request $request, int $userId, ?int $groupId, string $visibility): void
+    {
         // Build only provided attributes to avoid nulling other fields on partial updates
         $providedAttributes = [];
         foreach (['status', 'arrival_time', 'location', 'start_location', 'eat_location', 'note'] as $attribute) {
@@ -139,21 +200,18 @@ class WeekStatusController extends Controller
                 $providedAttributes[$attribute] = $request->input($attribute);
             }
         }
-
-        // Ensure keys exist, even if value is null, to intentionally clear fields when desired
-        // For example, when status is set to 'Home' we still pass arrival/location as null explicitly from the client
+        
+        $providedAttributes['visibility'] = $visibility;
 
         UserDayStatus::updateOrCreate(
             [
                 'user_id' => $userId,
-                'group_id' => $request->input('group_id'),
+                'group_id' => $groupId,
                 'iso_week' => $request->string('iso_week')->toString(),
                 'weekday' => (int) $request->integer('weekday'),
             ],
             $providedAttributes
         );
-
-        return back();
     }
 
     public function destroy(Request $request): RedirectResponse

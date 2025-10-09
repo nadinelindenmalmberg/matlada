@@ -21,6 +21,7 @@ class UserDayStatus extends Model
         'start_location',
         'eat_location',
         'note',
+        'visibility',
     ];
 
     protected $casts = [
@@ -36,5 +37,20 @@ class UserDayStatus extends Model
     public function group(): BelongsTo
     {
         return $this->belongsTo(Group::class);
+    }
+
+    public function isGroupOnly(): bool
+    {
+        return $this->visibility === 'group_only';
+    }
+
+    public function isAllGroups(): bool
+    {
+        return $this->visibility === 'all_groups';
+    }
+
+    public function isPrivate(): bool
+    {
+        return $this->visibility === 'private';
     }
 }

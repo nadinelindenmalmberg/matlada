@@ -19,7 +19,7 @@ return new class extends Migration
             $table->enum('status', ['Matlåda', 'Köpa', 'Hemma'])->nullable();
             $table->time('arrival_time')->nullable();
             $table->timestamps();
-            $table->unique(['user_id', 'iso_week', 'weekday']);
+            $table->unique(['user_id', 'group_id', 'iso_week', 'weekday']);
         });
     }
 

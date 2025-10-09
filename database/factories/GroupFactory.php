@@ -21,6 +21,23 @@ class GroupFactory extends Factory
             'description' => fake()->sentence(),
             'is_active' => true,
             'created_by' => \App\Models\User::factory(),
+            'privacy' => 'private',
+            'category' => fake()->randomElement(['location', 'interest', 'program', 'course', 'other']),
+            'tags' => implode(',', fake()->words(3, false)),
         ];
+    }
+
+    public function public(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'privacy' => 'public',
+        ]);
+    }
+
+    public function private(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'privacy' => 'private',
+        ]);
     }
 }
