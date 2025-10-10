@@ -95,6 +95,15 @@ function getUserDay(
     return rows.find((r: UserDayRow) => r.weekday === weekday);
 }
 
+function getUserDays(
+    statusesByUser: PageProps['statuses'],
+    userId: number,
+    weekday: number
+) {
+    const rows = statusesByUser[String(userId)] ?? [];
+    return rows.filter((r: UserDayRow) => r.weekday === weekday);
+}
+
 function getStatusBadgeVariant(status: StatusValue): React.ComponentProps<typeof Badge>["variant"] {
     if (status === 'Lunchbox') return 'secondary'; // Green
     if (status === 'Buying') return 'default'; // Orange/primary
@@ -1142,6 +1151,7 @@ export default function WeekStatusIndex() {
                                         {weekdays.map((d) => {
                                             const isSelf = u.id === canEditUserId;
                                             const current = isSelf ? getCurrentUserDay(u.id, d.value) : getUserDay(statuses, u.id, d.value);
+                                            const userDays = isSelf ? [current].filter(Boolean) : getUserDays(statuses, u.id, d.value);
                                             const value: StatusValue = current?.status ?? null;
                                             const timeValue = current?.arrival_time ?? '';
                                             const cellKey = getCellKey(u.id, d.value);
@@ -1187,48 +1197,69 @@ export default function WeekStatusIndex() {
                                                         />
                                                     ) : (
                                                         <div className="relative w-full group">
-                                                            {value ? (
-                                                                <div className="p-2 bg-muted/20 rounded-lg border relative">
-                                                                    {/* Copy action - only show if they have data */}
-                                                                    <div className="absolute top-2 right-2 opacity-0 text-white group-hover:opacity-100 transition-opacity duration-200">
-                                                                    <Tooltip delayDuration={500}>
-                                                                        <TooltipTrigger asChild>
-                                                                            <Button
-                                                                                type="button"
-                                                                                variant="ghost"
-                                                                                size="icon"
-                                                                                    className="size-7 hover:bg-white/20 hover:text-white"
-                                                                            aria-label={t('Copy day', 'Copy day')}
-                                                                            onClick={() => {
-                                                                                const data: CopiedData = {
-                                                                                    status: value,
-                                                                                    arrival_time: timeValue || null,
-                                                                                    location: locationValue || null,
-                                                                                    start_location: null,
-                                                                                    eat_location: null,
-                                                                                    note: null,
-                                                                                };
-                                                                                setCopiedData(data);
-                                                                                toast.info(t('Copied!', 'Copied!'));
-                                                                            }}
-                                                                        >
-                                                                                    <Icon iconNode={CopyIcon} className="size-3.5" />
-                                                                        </Button>
-                                                                    </TooltipTrigger>
-                                                                    <TooltipContent>{t('Copy day', 'Copy day')}</TooltipContent>
-                                                                </Tooltip>
-                                                            </div>
-                                                                    <div className="space-y-1.5">
-                                                                        <Badge variant={getStatusBadgeVariant(value)} className={`${getStatusBadgeClass(value)} ${getBadgeSizeClass()} font-semibold w-full justify-start`}>
-                                                                            <span>
-                                                                                {value === 'Lunchbox' ? t('Lunchbox', 'Lunchbox') : value === 'Buying' ? t('Buying', 'Buying') : value === 'Home' ? t('Home', 'Home') : t('Not with ya\'ll', 'Not with ya\'ll')}
-                                                                            </span>
-                                                                            {/* Eat location removed from badge for others view */}
-                                                                        </Badge>
-                                                                        <div className="text-xs text-foreground leading-relaxed text-left">
-                                                                            {generateNaturalStatusText(value, timeValue || null, locationValue || null, eatLocationValue || null, noteValue || null, t)}
-                                                                        </div>
-                                                                    </div>
+                                                            {userDays.length > 0 ? (
+                                                                <div className="space-y-2">
+                                                                    {userDays.map((userDay, index) => {
+                                                                        const groupName = userDay.group_id ? 
+                                                                            (groups.find(g => g.id === userDay.group_id)?.name || `Group ${userDay.group_id}`) : 
+                                                                            'Personal';
+                                                                        const isPersonal = !userDay.group_id;
+                                                                        
+                                                                        return (
+                                                                            <div key={userDay.id || index} className="p-2 bg-muted/20 rounded-lg border relative">
+                                                                                {/* Copy action - only show if they have data */}
+                                                                                <div className="absolute top-2 right-2 opacity-0 text-white group-hover:opacity-100 transition-opacity duration-200">
+                                                                                    <Tooltip delayDuration={500}>
+                                                                                        <TooltipTrigger asChild>
+                                                                                            <Button
+                                                                                                type="button"
+                                                                                                variant="ghost"
+                                                                                                size="icon"
+                                                                                                className="size-7 hover:bg-white/20 hover:text-white"
+                                                                                                aria-label={t('Copy day', 'Copy day')}
+                                                                                                onClick={() => {
+                                                                                                    const data: CopiedData = {
+                                                                                                        status: userDay.status,
+                                                                                                        arrival_time: userDay.arrival_time || null,
+                                                                                                        location: userDay.location || null,
+                                                                                                        start_location: null,
+                                                                                                        eat_location: null,
+                                                                                                        note: null,
+                                                                                                    };
+                                                                                                    setCopiedData(data);
+                                                                                                    toast.info(t('Copied!', 'Copied!'));
+                                                                                                }}
+                                                                                            >
+                                                                                                <Icon iconNode={CopyIcon} className="size-3.5" />
+                                                                                            </Button>
+                                                                                        </TooltipTrigger>
+                                                                                        <TooltipContent>{t('Copy day', 'Copy day')}</TooltipContent>
+                                                                                    </Tooltip>
+                                                                                </div>
+                                                                                <div className="space-y-1.5">
+                                                                                    <div className="flex items-center gap-1">
+                                                                                        <Badge variant={getStatusBadgeVariant(userDay.status)} className={`${getStatusBadgeClass(userDay.status)} ${getBadgeSizeClass()} font-semibold flex-1 justify-start`}>
+                                                                                            <span>
+                                                                                                {userDay.status === 'Lunchbox' ? t('Lunchbox', 'Lunchbox') : 
+                                                                                                 userDay.status === 'Buying' ? t('Buying', 'Buying') : 
+                                                                                                 userDay.status === 'Home' ? t('Home', 'Home') : 
+                                                                                                 t('Not with ya\'ll', 'Not with ya\'ll')}
+                                                                                            </span>
+                                                                                        </Badge>
+                                                                                        <span className={`text-xs px-1.5 py-0.5 rounded text-white ${isPersonal ? 'bg-blue-600' : 'bg-purple-600'}`}>
+                                                                                            {isPersonal ? '👤' : '👥'}
+                                                                                        </span>
+                                                                                    </div>
+                                                                                    <div className="text-xs text-muted-foreground">
+                                                                                        {groupName}
+                                                                                    </div>
+                                                                                    <div className="text-xs text-foreground leading-relaxed text-left">
+                                                                                        {generateNaturalStatusText(userDay.status, userDay.arrival_time || null, userDay.location || null, userDay.eat_location || null, userDay.note || null, t)}
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        );
+                                                                    })}
                                                                 </div>
                                                             ) : (
                                                                 <div className="p-2 bg-muted/10 rounded-lg border border-dashed">
