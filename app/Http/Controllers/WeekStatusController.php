@@ -119,7 +119,11 @@ class WeekStatusController extends Controller
                     ->where('iso_week', $week)
                     ->where(function ($query) use ($currentUserId, $userGroupIds) {
                         $query->where('user_id', $currentUserId) // User's own statuses
-                              ->orWhere('visibility', 'all_groups') // Statuses visible to all groups
+                              ->orWhere(function ($subQuery) use ($userGroupIds) {
+                                  // Statuses visible to all groups from users in the same groups
+                                  $subQuery->where('visibility', 'all_groups')
+                                          ->whereIn('group_id', $userGroupIds);
+                              })
                               ->orWhere(function ($subQuery) use ($userGroupIds) {
                                   // Statuses from groups the user belongs to
                                   $subQuery->whereIn('group_id', $userGroupIds)
@@ -176,16 +180,21 @@ class WeekStatusController extends Controller
         $visibility = $request->input('visibility', 'group_only');
         $groupId = $request->input('group_id');
         
+        // Validate that group_id is provided for group_only visibility
+        if ($visibility === 'group_only' && !$groupId) {
+            abort(400, 'Group ID is required for group_only visibility.');
+        }
+        
         if ($visibility === 'all_groups') {
             // Create status for all user's groups
             $userGroups = $request->user()->groups;
             foreach ($userGroups as $userGroup) {
                 $this->createOrUpdateStatus($request, $userId, $userGroup->id, $visibility);
             }
-           } else {
-               // Single group
-               $this->createOrUpdateStatus($request, $userId, $groupId, $visibility);
-           }
+        } else {
+            // Single group
+            $this->createOrUpdateStatus($request, $userId, $groupId, $visibility);
+        }
 
         return back();
     }
