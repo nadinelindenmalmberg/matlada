@@ -917,10 +917,20 @@ export default function WeekStatusIndex() {
             return next;
         });
 
-        // Apply optimistic clear (remove the row)
+        // Apply optimistic clear (set all fields to null/empty)
         setOptimisticStatuses(prev => {
             const next = { ...prev };
-            delete next[key];
+            next[key] = {
+                id: 0,
+                user_id: canEditUserId,
+                weekday,
+                status: null,
+                arrival_time: null,
+                location: null,
+                start_location: null,
+                eat_location: null,
+                note: null,
+            };
             return next;
         });
 
