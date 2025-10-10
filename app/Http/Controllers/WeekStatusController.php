@@ -158,7 +158,7 @@ class WeekStatusController extends Controller
             'start_location' => ['nullable', 'string', 'max:120'],
             'eat_location' => ['nullable', 'string', 'max:120'],
             'note' => ['nullable', 'string'],
-            'visibility' => ['nullable', 'in:group_only,all_groups,private'],
+            'visibility' => ['nullable', 'in:group_only,all_groups'],
         ]);
 
         $userId = (int) $request->user()->id;
@@ -182,11 +182,10 @@ class WeekStatusController extends Controller
             foreach ($userGroups as $userGroup) {
                 $this->createOrUpdateStatus($request, $userId, $userGroup->id, $visibility);
             }
-        } else {
-            // Single group or private
-            $targetGroupId = $visibility === 'private' ? null : $groupId;
-            $this->createOrUpdateStatus($request, $userId, $targetGroupId, $visibility);
-        }
+           } else {
+               // Single group
+               $this->createOrUpdateStatus($request, $userId, $groupId, $visibility);
+           }
 
         return back();
     }

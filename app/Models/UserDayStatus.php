@@ -49,8 +49,4 @@ class UserDayStatus extends Model
         return $this->visibility === 'all_groups';
     }
 
-    public function isPrivate(): bool
-    {
-        return $this->visibility === 'private';
-    }
 }
