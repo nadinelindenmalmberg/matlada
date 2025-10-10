@@ -648,7 +648,7 @@ export default function WeekStatusIndex() {
                 start_location: finalStart,
                 eat_location: finalEat,
                 note: finalNote,
-                visibility: 'group_only', // Default visibility - will be made configurable
+                visibility: group ? 'group_only' : 'all_groups', // Use group_only for specific group, all_groups for global view
             },
             {
                 preserveScroll: true,
