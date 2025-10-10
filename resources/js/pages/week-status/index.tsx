@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Head, usePage, router } from '@inertiajs/react';
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupButton } from '@/components/ui/input-group';
 // import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -36,6 +36,8 @@ type UserDayRow = {
     start_location?: string | null;
     eat_location?: string | null;
     note?: string | null;
+    group_id?: number | null;
+    visibility?: string;
 };
 
 type CopiedData = {
@@ -102,6 +104,25 @@ function getUserDays(
 ) {
     const rows = statusesByUser[String(userId)] ?? [];
     return rows.filter((r: UserDayRow) => r.weekday === weekday);
+}
+
+// Optimized function to pre-process all statuses by user and weekday
+function processStatusesForDisplay(statusesByUser: PageProps['statuses'], groupId?: number | null) {
+    const processed: Record<string, Record<number, UserDayRow[]>> = {};
+    
+    Object.entries(statusesByUser).forEach(([userId, userStatuses]) => {
+        processed[userId] = {};
+        
+        // Group statuses by weekday
+        userStatuses.forEach((status: UserDayRow) => {
+            if (!processed[userId][status.weekday]) {
+                processed[userId][status.weekday] = [];
+            }
+            processed[userId][status.weekday].push(status);
+        });
+    });
+    
+    return processed;
 }
 
 function getStatusBadgeVariant(status: StatusValue): React.ComponentProps<typeof Badge>["variant"] {
@@ -530,6 +551,13 @@ function WeekStatusCell({
 
 export default function WeekStatusIndex() {
     const { week, group, groups, users, statuses, canEditUserId, activeWeekday } = usePage<PageProps>().props;
+    
+    // Pre-process statuses for optimal performance (fixes N+1 query problem)
+    const processedStatuses = useMemo(() => 
+        processStatusesForDisplay(statuses, group?.id), 
+        [statuses, group?.id]
+    );
+    
     // Removed global processing state for seamless UX
     const [draftLocations, setDraftLocations] = React.useState<Record<string, string>>({});
     //
@@ -657,7 +685,7 @@ export default function WeekStatusIndex() {
                 start_location: finalStart,
                 eat_location: finalEat,
                 note: finalNote,
-                visibility: group ? 'group_only' : 'all_groups', // Use group_only for specific group, all_groups for global view
+                visibility: group ? 'group_only' : (groups.length > 0 ? 'all_groups' : 'group_only'), // Use group_only for specific group, all_groups for global view if user has groups, group_only for personal status if no groups
             },
             {
                 preserveScroll: true,
@@ -825,7 +853,7 @@ export default function WeekStatusIndex() {
                 start_location: mergedStart,
                 eat_location: mergedEat,
                 note: mergedNote,
-                visibility: group ? 'group_only' : 'all_groups', // Use group_only for specific group, all_groups for global view
+                visibility: group ? 'group_only' : (groups.length > 0 ? 'all_groups' : 'group_only'), // Use group_only for specific group, all_groups for global view if user has groups, group_only for personal status if no groups
             },
             {
                 preserveScroll: true,
@@ -1151,9 +1179,9 @@ export default function WeekStatusIndex() {
                                         {weekdays.map((d) => {
                                             const isSelf = u.id === canEditUserId;
                                             const current = isSelf ? getCurrentUserDay(u.id, d.value) : getUserDay(statuses, u.id, d.value);
-                                            // Only show multiple statuses in global view (no specific group selected)
+                                            // Use pre-processed statuses for optimal performance
                                             const userDays = isSelf ? [current].filter(Boolean) : 
-                                                (group?.id ? [current].filter(Boolean) : getUserDays(statuses, u.id, d.value));
+                                                (group?.id ? [current].filter(Boolean) : (processedStatuses[String(u.id)]?.[d.value] ?? []));
                                             const value: StatusValue = current?.status ?? null;
                                             const timeValue = current?.arrival_time ?? '';
                                             const cellKey = getCellKey(u.id, d.value);
@@ -1201,7 +1229,7 @@ export default function WeekStatusIndex() {
                                                         <div className="relative w-full group">
                                                             {userDays.length > 0 ? (
                                                                 <div className="space-y-2">
-                                                                    {userDays.map((userDay, index) => {
+                                                                    {userDays.filter((userDay): userDay is NonNullable<typeof userDay> => Boolean(userDay)).map((userDay, index) => {
                                                                         const groupName = userDay.group_id ? 
                                                                             (groups.find(g => g.id === userDay.group_id)?.name || `Group ${userDay.group_id}`) : 
                                                                             'Personal';
