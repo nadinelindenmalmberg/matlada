@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { Icon } from '@/components/ui/icon';
-import { Copy as CopyIcon, ClipboardPaste as PasteIcon, Trash2 as TrashIcon, MoreHorizontal as MoreHorizontalIcon, MapPin as MapPinIcon, UtensilsCrossed as UtensilsIcon, ShoppingCart as ShoppingCartIcon, Home as HomeIcon, StickyNote as StickyNoteIcon, Users as UsersIcon, ChevronDown as ChevronDownIcon, Clock as ClockIcon, Repeat as RepeatIcon, Check as CheckIcon } from 'lucide-react';
+import { Copy as CopyIcon, ClipboardPaste as PasteIcon, Trash2 as TrashIcon, MoreHorizontal as MoreHorizontalIcon, MapPin as MapPinIcon, UtensilsCrossed as UtensilsIcon, ShoppingCart as ShoppingCartIcon, Home as HomeIcon, StickyNote as StickyNoteIcon, Users as UsersIcon, User as UserIcon, ChevronDown as ChevronDownIcon, Clock as ClockIcon, Repeat as RepeatIcon, Check as CheckIcon } from 'lucide-react';
 //
 import { toast } from 'sonner';
 import AppLayout from '@/layouts/app-layout';
@@ -1247,7 +1247,7 @@ export default function WeekStatusIndex() {
                                                                                             </span>
                                                                                         </Badge>
                                                                                         <span className={`text-xs px-1.5 py-0.5 rounded text-white ${isPersonal ? 'bg-blue-600' : 'bg-purple-600'}`}>
-                                                                                            {isPersonal ? '👤' : '👥'}
+                                                                                            <Icon iconNode={isPersonal ? UserIcon : UsersIcon} className="size-3" />
                                                                                         </span>
                                                                                     </div>
                                                                                     <div className="text-xs text-muted-foreground">
