@@ -1151,7 +1151,9 @@ export default function WeekStatusIndex() {
                                         {weekdays.map((d) => {
                                             const isSelf = u.id === canEditUserId;
                                             const current = isSelf ? getCurrentUserDay(u.id, d.value) : getUserDay(statuses, u.id, d.value);
-                                            const userDays = isSelf ? [current].filter(Boolean) : getUserDays(statuses, u.id, d.value);
+                                            // Only show multiple statuses in global view (no specific group selected)
+                                            const userDays = isSelf ? [current].filter(Boolean) : 
+                                                (group?.id ? [current].filter(Boolean) : getUserDays(statuses, u.id, d.value));
                                             const value: StatusValue = current?.status ?? null;
                                             const timeValue = current?.arrival_time ?? '';
                                             const cellKey = getCellKey(u.id, d.value);
