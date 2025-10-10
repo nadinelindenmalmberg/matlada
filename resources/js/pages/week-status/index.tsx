@@ -812,9 +812,11 @@ export default function WeekStatusIndex() {
                 status,
                 arrival_time,
                 location,
+                group_id: group?.id || null,
                 start_location: mergedStart,
                 eat_location: mergedEat,
                 note: mergedNote,
+                visibility: group ? 'group_only' : 'all_groups', // Use group_only for specific group, all_groups for global view
             },
             {
                 preserveScroll: true,
