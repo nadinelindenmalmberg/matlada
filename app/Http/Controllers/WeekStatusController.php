@@ -99,7 +99,7 @@ class WeekStatusController extends Controller
                     ->select(['id', 'name', 'email', 'avatar'])
                     ->get();
                 
-                // Show only their own statuses
+                // Show only their own statuses (including personal statuses with group_id = null)
                 $statusQuery = UserDayStatus::query()
                     ->where('iso_week', $week)
                     ->where('user_id', $currentUserId);
@@ -179,20 +179,21 @@ class WeekStatusController extends Controller
         // Handle visibility logic
         $visibility = $request->input('visibility', 'group_only');
         $groupId = $request->input('group_id');
+        $userGroups = $request->user()->groups;
         
-        // Validate that group_id is provided for group_only visibility
-        if ($visibility === 'group_only' && !$groupId) {
-            abort(400, 'Group ID is required for group_only visibility.');
-        }
-        
-        if ($visibility === 'all_groups') {
+        // Handle users with no groups - create personal status
+        if ($userGroups->isEmpty()) {
+            $this->createOrUpdateStatus($request, $userId, null, 'group_only');
+        } else if ($visibility === 'all_groups') {
             // Create status for all user's groups
-            $userGroups = $request->user()->groups;
             foreach ($userGroups as $userGroup) {
                 $this->createOrUpdateStatus($request, $userId, $userGroup->id, $visibility);
             }
         } else {
-            // Single group
+            // Single group - validate that group_id is provided
+            if (!$groupId) {
+                abort(400, 'Group ID is required for group_only visibility.');
+            }
             $this->createOrUpdateStatus($request, $userId, $groupId, $visibility);
         }
 
