@@ -104,11 +104,8 @@ class WeekStatusController extends Controller
                 $statusQuery = UserDayStatus::query()
                     ->where('iso_week', $week);
             } else {
-                // User belongs to groups - show group members
+                // User belongs to groups - show all users (including those not in groups)
                 $users = User::query()
-                    ->whereHas('groups', function ($query) use ($userGroupIds) {
-                        $query->whereIn('groups.id', $userGroupIds);
-                    })
                     ->select(['id', 'name', 'email', 'avatar'])
                     ->orderByRaw('CASE WHEN id = ? THEN 0 ELSE 1 END', [$currentUserId])
                     ->orderBy('name')
@@ -124,6 +121,11 @@ class WeekStatusController extends Controller
                                   // Statuses from groups the user belongs to
                                   $subQuery->whereIn('group_id', $userGroupIds)
                                           ->where('visibility', 'group_only');
+                              })
+                              ->orWhere(function ($subQuery) {
+                                  // Global statuses from users not in any groups (backward compatibility)
+                                  $subQuery->whereNull('group_id')
+                                          ->whereNull('visibility'); // Old statuses without visibility field
                               });
                     });
             }
