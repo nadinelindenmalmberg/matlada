@@ -93,25 +93,28 @@ class WeekStatusController extends Controller
             $userGroupIds = $currentUser->groups()->pluck('groups.id');
             
             if ($userGroupIds->isEmpty()) {
-                // User hasn't joined any groups yet - show all users (backward compatibility)
+                // User hasn't joined any groups yet - show only themselves
                 $users = User::query()
+                    ->where('id', $currentUserId)
                     ->select(['id', 'name', 'email', 'avatar'])
-                    ->orderByRaw('CASE WHEN id = ? THEN 0 ELSE 1 END', [$currentUserId])
-                    ->orderBy('name')
                     ->get();
                 
-                // Show all statuses (backward compatibility)
+                // Show only their own statuses
                 $statusQuery = UserDayStatus::query()
-                    ->where('iso_week', $week);
+                    ->where('iso_week', $week)
+                    ->where('user_id', $currentUserId);
             } else {
-                // User belongs to groups - show all users (including those not in groups)
+                // User belongs to groups - show only group members
                 $users = User::query()
+                    ->whereHas('groups', function ($query) use ($userGroupIds) {
+                        $query->whereIn('groups.id', $userGroupIds);
+                    })
                     ->select(['id', 'name', 'email', 'avatar'])
                     ->orderByRaw('CASE WHEN id = ? THEN 0 ELSE 1 END', [$currentUserId])
                     ->orderBy('name')
                     ->get();
                     
-                // Get statuses visible globally
+                // Get statuses visible to group members
                 $statusQuery = UserDayStatus::query()
                     ->where('iso_week', $week)
                     ->where(function ($query) use ($currentUserId, $userGroupIds) {
@@ -121,11 +124,6 @@ class WeekStatusController extends Controller
                                   // Statuses from groups the user belongs to
                                   $subQuery->whereIn('group_id', $userGroupIds)
                                           ->where('visibility', 'group_only');
-                              })
-                              ->orWhere(function ($subQuery) {
-                                  // Global statuses from users not in any groups (backward compatibility)
-                                  $subQuery->whereNull('group_id')
-                                          ->whereNull('visibility'); // Old statuses without visibility field
                               });
                     });
             }
