@@ -593,7 +593,12 @@ export default function WeekStatusIndex() {
     // Helper to get current data (optimistic or server)
     function getCurrentUserDay(userId: number, weekday: number): UserDayRow | undefined {
         const cellKey = getCellKey(userId, weekday);
-        return optimisticStatuses[cellKey] || getUserDay(statuses, userId, weekday);
+        // If we have an optimistic update, use it (even if it's undefined for cleared statuses)
+        if (cellKey in optimisticStatuses) {
+            return optimisticStatuses[cellKey];
+        }
+        // Otherwise, fall back to server data
+        return getUserDay(statuses, userId, weekday);
     }
 
     // Show save confirmation briefly
