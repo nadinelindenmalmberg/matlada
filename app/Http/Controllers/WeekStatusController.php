@@ -128,6 +128,17 @@ class WeekStatusController extends Controller
                                   // Statuses from groups the user belongs to
                                   $subQuery->whereIn('group_id', $userGroupIds)
                                           ->where('visibility', 'group_only');
+                              })
+                              ->orWhere(function ($subQuery) use ($userGroupIds) {
+                                  // Group-only statuses from users in the same groups (including personal statuses)
+                                  // This allows group members to see each other's personal statuses
+                                  $subQuery->where('visibility', 'group_only')
+                                          ->whereIn('user_id', function ($userQuery) use ($userGroupIds) {
+                                              $userQuery->select('users.id')
+                                                       ->from('users')
+                                                       ->join('group_user', 'users.id', '=', 'group_user.user_id')
+                                                       ->whereIn('group_user.group_id', $userGroupIds);
+                                          });
                               });
                     });
             }
