@@ -86,6 +86,11 @@ class WeekStatusController extends Controller
                               // Show statuses visible to all groups from users in this group
                               $subQuery->where('visibility', 'all_groups')
                                       ->whereIn('user_id', $group->users()->pluck('users.id'));
+                          })
+                          ->orWhere(function ($subQuery) use ($group) {
+                              // Show group-only statuses from users in this group (including personal statuses)
+                              $subQuery->where('visibility', 'group_only')
+                                      ->whereIn('user_id', $group->users()->pluck('users.id'));
                           });
                 });
         } else {
